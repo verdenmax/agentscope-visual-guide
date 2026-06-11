@@ -396,6 +396,13 @@ LESSON_03 = blocks(
 )
 
 
+LESSONS = {
+    "01-what-is-agentscope.html": LESSON_01,
+    "02-architecture.html": LESSON_02,
+    "03-lifecycle.html": LESSON_03,
+}
+
+
 QUIZZES = {
     "01-what-is-agentscope.html": [
         (
