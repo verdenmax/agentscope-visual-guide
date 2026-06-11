@@ -119,7 +119,7 @@ LESSON_01 = blocks(
         ("agent/_agent.py",
          "<code>Agent</code> 类与 <code>reply</code> / <code>reply_stream</code>",
          "the <code>Agent</code> class and <code>reply</code> / <code>reply_stream</code>"),
-        ("model/_dashscope.py",
+        ("model/_dashscope/_model.py",
          "<code>DashScopeChatModel</code> 等厂商模型实现",
          "vendor model implementations such as <code>DashScopeChatModel</code>"),
         ("tool/_toolkit.py",
@@ -339,12 +339,16 @@ LESSON_03 = blocks(
         blocks(
             p(
                 "推理 → 行动会循环进行，直到模型给出最终答案，Agent 发出 "
-                "<code>REPLY_END</code>（携带最终的 <code>AssistantMsg</code>）；"
-                "若超过最大轮数则发出 <code>EXCEED_MAX_ITERS</code>。",
+                "<code>REPLY_END</code>（仅标志本次回复结束，携带 <code>reply_id</code>，"
+                "<strong>不</strong>携带最终消息）；若超过最大轮数则发出 "
+                "<code>EXCEED_MAX_ITERS</code>。最终的 <code>AssistantMsg</code> 通过 "
+                "<code>agent.reply(...)</code> 获取，或由流式文本块自行累积。",
                 "Reason → act repeats until the model produces a final answer and the "
-                "agent emits <code>REPLY_END</code> (carrying the final "
-                "<code>AssistantMsg</code>); if it exceeds the iteration cap it emits "
-                "<code>EXCEED_MAX_ITERS</code>.",
+                "agent emits <code>REPLY_END</code> (which only signals the reply is "
+                "complete and carries a <code>reply_id</code> — it does <strong>not</strong> "
+                "carry the final message); if it exceeds the iteration cap it emits "
+                "<code>EXCEED_MAX_ITERS</code>. Obtain the final <code>AssistantMsg</code> "
+                "via <code>agent.reply(...)</code> or by accumulating the streamed text blocks.",
             ),
         ),
         num=4,

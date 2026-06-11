@@ -119,10 +119,11 @@ LESSON_13 = blocks(
     code(
         "# 1) 取所有工具的 JSON schema（异步！交给模型）\n"
         "schemas = await toolkit.get_tool_schemas()\n\n"
-        "# 2) 模型选定后，按名字执行\n"
-        "result = await toolkit.call_tool(tool_call)   # 返回工具结果 / yields tool result",
-        cap_zh="get_tool_schemas 是 async；call_tool 执行选中的工具。",
-        cap_en="get_tool_schemas is async; call_tool runs the chosen tool.",
+        "# 2) 模型选定后，按名字执行（call_tool 是 async generator，需要 state）\n"
+        "async for chunk in toolkit.call_tool(tool_call, state):\n"
+        "    ...   # 流式 ToolChunk，最后是完整的 ToolResponse / streamed, then final ToolResponse",
+        cap_zh="get_tool_schemas 是 async；call_tool 是 async generator（带 state）。",
+        cap_en="get_tool_schemas is async; call_tool is an async generator (takes state).",
     ),
     important(
         "<code>get_tool_schemas</code> 是<strong>异步</strong>方法（取代了旧版的同步 "
@@ -283,7 +284,7 @@ LESSON_15 = blocks(
          "<code>on_acting</code> / <code>on_model_call</code> / <code>on_system_prompt</code> 等",
          "<code>MiddlewareBase</code> and hooks: <code>on_reply</code> / <code>on_reasoning</code> "
          "/ <code>on_acting</code> / <code>on_model_call</code> / <code>on_system_prompt</code>, etc."),
-        ("middleware/_tracing.py", "<code>TracingMiddleware</code>",
+        ("middleware/_tracing/_trace.py", "<code>TracingMiddleware</code>",
          "<code>TracingMiddleware</code>"),
         ("middleware/_tts_middleware.py", "<code>TTSMiddleware</code>",
          "<code>TTSMiddleware</code>"),

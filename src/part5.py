@@ -128,9 +128,9 @@ LESSON_17 = blocks(
          "<code>WorkspaceBase</code> unified interface"),
         ("workspace/_local_workspace.py", "<code>LocalWorkspace</code>",
          "<code>LocalWorkspace</code>"),
-        ("workspace/_docker.py", "<code>DockerWorkspace</code>",
+        ("workspace/_docker/_docker_workspace.py", "<code>DockerWorkspace</code>",
          "<code>DockerWorkspace</code>"),
-        ("workspace/_e2b.py", "<code>E2BWorkspace</code>",
+        ("workspace/_e2b/_e2b_workspace.py", "<code>E2BWorkspace</code>",
          "<code>E2BWorkspace</code>"),
         ("workspace/_offload_protocol.py", "<code>Offloader</code> 协议",
          "the <code>Offloader</code> protocol"),
@@ -337,7 +337,7 @@ LESSON_21 = blocks(
         "from agentscope.embedding import DashScopeEmbeddingModel, FileEmbeddingCache\n\n"
         "embed = DashScopeEmbeddingModel(\n"
         "    ...,                       # credential + model name\n"
-        "    cache=FileEmbeddingCache(...),  # optional: reuse past results\n"
+        "    embedding_cache=FileEmbeddingCache(...),  # optional: reuse past results\n"
         ")\n"
         "resp = await embed([\"hello\", \"world\"])   # -> EmbeddingResponse",
         cap_zh="嵌入模型可调用（async），返回 EmbeddingResponse；缓存可选。",
@@ -353,7 +353,7 @@ LESSON_21 = blocks(
     source_map([
         ("embedding/_embedding_base.py", "<code>EmbeddingModelBase</code>（可调用，async）",
          "<code>EmbeddingModelBase</code> (async-callable)"),
-        ("embedding/_dashscope.py", "<code>DashScopeEmbeddingModel</code> 等厂商实现",
+        ("embedding/_dashscope/_model.py", "<code>DashScopeEmbeddingModel</code> 等厂商实现",
          "<code>DashScopeEmbeddingModel</code> and other vendor implementations"),
         ("embedding/_file_cache.py", "<code>FileEmbeddingCache</code>（<code>EmbeddingCacheBase</code>）",
          "<code>FileEmbeddingCache</code> (<code>EmbeddingCacheBase</code>)"),
@@ -414,7 +414,7 @@ LESSON_22 = blocks(
     source_map([
         ("tts/_tts_base.py", "<code>TTSModelBase</code>（connect/push/synthesize，async）",
          "<code>TTSModelBase</code> (connect/push/synthesize, async)"),
-        ("tts/_dashscope.py", "<code>DashScopeTTSModel</code> / <code>DashScopeRealtimeTTSModel</code>",
+        ("tts/_dashscope/_model.py", "<code>DashScopeTTSModel</code> / <code>DashScopeRealtimeTTSModel</code>",
          "<code>DashScopeTTSModel</code> / <code>DashScopeRealtimeTTSModel</code>"),
         ("tts/_tts_response.py", "<code>TTSResponse</code> / <code>TTSUsage</code>",
          "<code>TTSResponse</code> / <code>TTSUsage</code>"),

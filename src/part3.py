@@ -77,13 +77,18 @@ LESSON_09 = blocks(
             p(
                 "事件类继承自 <code>EventBase</code>，带有 <code>type</code> 字段（<code>EventType</code> 之一）"
                 "与该事件相关的负载，例如 <code>TextBlockDeltaEvent</code> 带增量文本、"
-                "<code>ToolCallStartEvent</code> 带将要调用的工具信息、"
-                "<code>ReplyEndEvent</code> 带最终的 <code>AssistantMsg</code>。",
+                "<code>ToolCallStartEvent</code> 带将要调用的工具信息。注意 "
+                "<code>ReplyEndEvent</code> 只带 <code>session_id</code> / <code>reply_id</code>，"
+                "<strong>不</strong>携带最终消息——最终 <code>AssistantMsg</code> 由 "
+                "<code>agent.reply()</code> 返回或从流式块累积。",
                 "Event classes inherit from <code>EventBase</code> with a <code>type</code> "
                 "field (one of <code>EventType</code>) plus payload: e.g. "
-                "<code>TextBlockDeltaEvent</code> carries the incremental text, "
-                "<code>ToolCallStartEvent</code> the tool about to be called, and "
-                "<code>ReplyEndEvent</code> the final <code>AssistantMsg</code>.",
+                "<code>TextBlockDeltaEvent</code> carries the incremental text and "
+                "<code>ToolCallStartEvent</code> the tool about to be called. Note that "
+                "<code>ReplyEndEvent</code> carries only <code>session_id</code> / "
+                "<code>reply_id</code> and does <strong>not</strong> include the final "
+                "message — the final <code>AssistantMsg</code> comes from "
+                "<code>agent.reply()</code> or by accumulating the streamed blocks.",
             ),
         ),
         num=1,
@@ -150,7 +155,7 @@ LESSON_10 = blocks(
         "            case EventType.TOOL_RESULT_END:\n"
         "                ui.show_result(evt)\n"
         "            case EventType.REPLY_END:\n"
-        "                ui.finish(evt)            # 最终 AssistantMsg / final message",
+        "                ui.finish(evt)            # 回复完成（不含最终消息）/ reply complete",
         cap_zh="用 match-case 按事件类型分发。",
         cap_en="Dispatch by event type with match-case.",
     ),

@@ -163,7 +163,7 @@ LESSON_05 = blocks(
          "<code>ChatModelBase</code> unified interface"),
         ("model/_model_response.py", "<code>ChatResponse</code> / <code>StructuredResponse</code>",
          "<code>ChatResponse</code> / <code>StructuredResponse</code>"),
-        ("model/_dashscope.py", "<code>DashScopeChatModel</code> 等厂商实现",
+        ("model/_dashscope/_model.py", "<code>DashScopeChatModel</code> 等厂商实现",
          "<code>DashScopeChatModel</code> and other vendor implementations"),
     ]),
     keypoints([

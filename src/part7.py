@@ -148,7 +148,7 @@ LESSON_27 = blocks(
          "next_handler)</code> 等）",
          "<code>MiddlewareBase</code> and hook signatures (<code>on_model_call(agent, "
          "input_kwargs, next_handler)</code>, etc.)"),
-        ("middleware/_tracing.py", "<code>TracingMiddleware</code>（参考实现）",
+        ("middleware/_tracing/_trace.py", "<code>TracingMiddleware</code>（参考实现）",
          "<code>TracingMiddleware</code> (reference implementation)"),
     ]),
     keypoints([
