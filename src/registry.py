@@ -6,6 +6,8 @@ so the lesson set stays in sync. Modules are added as content lands (Tasks 14-21
 """
 
 import part1
+import glossary
 
 CONTENT: dict = {}
 CONTENT.update(part1.LESSONS)
+CONTENT.update(glossary.LESSONS)
