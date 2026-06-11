@@ -8,4 +8,6 @@ import part1
 
 CONTENT = {
     "01-what-is-agentscope.html": part1.LESSON_01,
+    "02-architecture.html": part1.LESSON_02,
+    "03-lifecycle.html": part1.LESSON_03,
 }

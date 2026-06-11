@@ -9,6 +9,22 @@ from i18n import t
 
 QUIZZES: dict = {}
 
+# Lesson quizzes live in their content module as a module-level ``QUIZZES`` dict
+# (so content parts can be authored independently). Aggregate whatever exists.
+_PART_MODULES = (
+    "part1", "part2", "part3", "part4", "part5", "part6", "part7", "part8",
+    "glossary",
+)
+
+
+def _aggregate() -> None:
+    for name in _PART_MODULES:
+        try:
+            mod = __import__(name)
+        except ModuleNotFoundError:
+            continue
+        QUIZZES.update(getattr(mod, "QUIZZES", {}))
+
 
 def render(fname: str) -> str:
     """Render the quiz block for ``fname`` (empty string if none)."""
@@ -32,3 +48,6 @@ def render(fname: str) -> str:
             f'<div lang="en">{exp_en}</div></details></div>'
         )
     return f'<section class="quiz"><h2>{title}</h2>{"".join(out)}</section>'
+
+
+_aggregate()
