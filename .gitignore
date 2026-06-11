@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.DS_Store
+# locally-generated artifacts (CI produces the published copies)
+/print.zh.html
+/print.en.html
+/agentscope-visual-guide-zh.pdf
+/agentscope-visual-guide-en.pdf
