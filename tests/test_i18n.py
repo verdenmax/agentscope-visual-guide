@@ -109,6 +109,18 @@ class TestCode(unittest.TestCase):
         self.assertIn('<div class="code-cap" lang="zh">赋值</div>', out)
         self.assertIn('<div class="code-cap" lang="en">Assign</div>', out)
 
+    def test_exotic_line_separators_do_not_corrupt_source(self):
+        # str.splitlines() splits on \f, \u2028, \x85, ... but tokenize uses \n
+        # only; the highlighter must not duplicate/garble text around them.
+        for sep in ("\x0c", "\u2028", "\x85"):
+            src = f'x = "a{sep}b"\ny = 2'
+            out = i18n.code(src)
+            # strip span tags + unescape to recover the original text
+            import re
+            import html as _html
+            recovered = _html.unescape(re.sub(r"<[^>]+>", "", out))
+            self.assertEqual(recovered, src, f"separator {sep!r}")
+
 
 class TestAccordion(unittest.TestCase):
     def test_accordion_structure_bilingual(self):

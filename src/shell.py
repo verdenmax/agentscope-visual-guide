@@ -2,7 +2,7 @@
 
 import base64
 
-from i18n import t
+from i18n import t, esc
 
 ACCENT = "#6d5ae6"
 
@@ -21,8 +21,8 @@ INDEX_FILE = "index.html"
 
 def head_meta(zh_title: str, en_title: str, zh_desc: str, en_desc: str) -> str:
     """SEO/social meta tags + favicon (zh primary, en in og:title alt)."""
-    title = f"{zh_title} · {en_title}".replace('"', "&quot;")
-    desc = zh_desc.replace('"', "&quot;")
+    title = esc(f"{zh_title} · {en_title}")
+    desc = esc(zh_desc)
     return (
         f'<meta name="description" content="{desc}">\n'
         f'<meta name="theme-color" content="{ACCENT}">\n'
@@ -326,7 +326,7 @@ def page(fname: str, content: str, standalone: bool, home_href: str) -> str:
     prev_html = ""
     if i > 0:
         pf, pz, pe, _, _ = PAGES[i - 1]
-        prev_dir, prev_title = t("← 上一课", "← Prev"), t(pz, pe)
+        prev_dir, prev_title = t("← 上一课", "← Prev"), t(esc(pz), esc(pe))
         prev_html = (
             f'<a class="nav-link prev" rel="prev" href="{pf}">'
             f'<span class="nav-dir">{prev_dir}</span>'
@@ -335,17 +335,19 @@ def page(fname: str, content: str, standalone: bool, home_href: str) -> str:
     next_html = ""
     if i < len(PAGES) - 1:
         nf, nz, ne, _, _ = PAGES[i + 1]
-        next_dir, next_title = t("下一课 →", "Next →"), t(nz, ne)
+        next_dir, next_title = t("下一课 →", "Next →"), t(esc(nz), esc(ne))
         next_html = (
             f'<a class="nav-link next" rel="next" href="{nf}">'
             f'<span class="nav-dir">{next_dir}</span>'
             f'<span class="nav-title">{next_title}</span></a>'
         )
 
-    home_lbl = t("← 目录", "← Contents")
-    part_lbl = t(zp, ep)
-    title_lbl = t(zt, et)
+    # head_meta escapes internally; escape the display copies for <title>/<h1>/pill.
     meta = head_meta(zt, et, zp, ep)
+    ezt, eet, ezp, eep = esc(zt), esc(et), esc(zp), esc(ep)
+    home_lbl = t("← 目录", "← Contents")
+    part_lbl = t(ezp, eep)
+    title_lbl = t(ezt, eet)
     foot = t(
         "对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。",
         "Aligned with AgentScope 2.0 source, verified 2026-06. "
@@ -357,7 +359,7 @@ def page(fname: str, content: str, standalone: bool, home_href: str) -> str:
         '<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
         f"{_HEAD_LANG_SCRIPT}\n"
-        f"<title>{zt} · {et}</title>\n"
+        f"<title>{ezt} · {eet}</title>\n"
         f"{meta}\n<style>{CSS}</style>\n</head>\n<body>\n"
         '<div class="topbar"><div class="topbar-inner">\n'
         f'<a class="home" href="{home_href}">{home_lbl}</a>\n'
@@ -391,13 +393,13 @@ def index_page(standalone: bool, lesson_prefix: str) -> str:
         items = ""
         for f, zt, et in groups[(zp, ep)]:
             n += 1
-            title = t(zt, et)
+            title = t(esc(zt), esc(et))
             items += (
                 f'<li><a href="{lesson_prefix}{f}">'
                 f'<span class="ix-num">{n:02d}</span>'
                 f'<span class="ix-title">{title}</span></a></li>'
             )
-        part_lbl = t(zp, ep)
+        part_lbl = t(esc(zp), esc(ep))
         sections += (
             f'<section class="ix-part"><h2>{part_lbl}</h2>'
             f'<ol class="ix-list">{items}</ol></section>'

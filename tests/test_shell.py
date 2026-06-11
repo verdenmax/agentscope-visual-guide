@@ -25,6 +25,19 @@ class TestDesignSystem(unittest.TestCase):
         self.assertIn("Messages", out)
         self.assertIn("描述", out)
 
+    def test_head_meta_escapes_special_chars(self):
+        out = shell.head_meta("A & B", "C & D", "d<e>f", "x")
+        self.assertNotIn("A & B", out)        # raw & must be escaped
+        self.assertIn("A &amp; B", out)
+        self.assertIn("d&lt;e&gt;f", out)
+
+    def test_page_escapes_ampersand_in_title(self):
+        # PAGES entry "工作区 & 沙箱" / "Workspace & Sandbox" must not leak raw &
+        out = shell.page("17-workspace.html", "x",
+                         standalone=True, home_href="../index.html")
+        self.assertNotIn("Workspace & Sandbox", out)
+        self.assertIn("Workspace &amp; Sandbox", out)
+
 
 class TestPage(unittest.TestCase):
     def _page(self):

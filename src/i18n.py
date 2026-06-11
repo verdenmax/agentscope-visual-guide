@@ -84,9 +84,12 @@ def table(headers: list, rows: list) -> str:
 
 
 def _line_starts(src: str) -> list:
+    # Offsets must follow tokenize's line model, which breaks on "\n" only.
+    # (str.splitlines also splits on \f, \v, \u2028, \x85, ... — using it here
+    # would desync token positions and corrupt the reconstructed text.)
     starts = [0]
-    for line in src.splitlines(keepends=True):
-        starts.append(starts[-1] + len(line))
+    for part in src.split("\n"):
+        starts.append(starts[-1] + len(part) + 1)
     return starts
 
 
