@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{var l=localStorage.getItem('asvg-lang');if(l!=='en')l='zh';document.documentElement.setAttribute('data-lang',l);document.documentElement.setAttribute('lang',l);}catch(e){}</script>
+<title>工作区 & 沙箱 · Workspace & Sandbox</title>
+<meta name="description" content="第五部分 · 进阶能力">
+<meta name="theme-color" content="#6d5ae6">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAzMiAzMic+PHJlY3Qgd2lkdGg9JzMyJyBoZWlnaHQ9JzMyJyByeD0nNycgZmlsbD0nIzZkNWFlNicvPjx0ZXh0IHg9JzE2JyB5PScyMicgZm9udC1mYW1pbHk9J3N5c3RlbS11aSxzYW5zLXNlcmlmJyBmb250LXNpemU9JzE1JyBmb250LXdlaWdodD0nNzAwJyBmaWxsPScjZmZmJyB0ZXh0LWFuY2hvcj0nbWlkZGxlJz5BUzwvdGV4dD48L3N2Zz4=">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AgentScope 图解教程">
+<meta property="og:title" content="工作区 & 沙箱 · Workspace & Sandbox">
+<meta property="og:description" content="第五部分 · 进阶能力">
+<meta name="twitter:card" content="summary">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
+  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
+  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
+  --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
+    --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
+    --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
+    --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body {
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
+    "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+a { color:var(--accent); text-decoration:none; }
+code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+  Menlo,Consolas,monospace; overflow-wrap:break-word; }
+p > code, li code, td code, .acc-body code {
+  background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+  padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
+
+/* ---- bilingual visibility (the core mechanism) ---- */
+html[data-lang="zh"] [lang="en"] { display: none; }
+html[data-lang="en"] [lang="zh"] { display: none; }
+
+/* ---- top bar + progress ---- */
+.topbar { position: sticky; top: 0; z-index: 50; background: var(--panel);
+  border-bottom: 1px solid var(--line); backdrop-filter: blur(8px); }
+.topbar-inner { max-width: 960px; margin: 0 auto; padding: .7rem 1.25rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.topbar .home { font-size: .82rem; color: var(--muted); font-weight: 600;
+  display: inline-flex; gap: .5rem; align-items: center; }
+.topbar .home b { color: var(--accent); }
+.topbar .pill { font-size: .72rem; color: var(--muted); background: var(--panel-2);
+  padding: .2rem .6rem; border-radius: 999px; border: 1px solid var(--line);
+  white-space: nowrap; }
+.progress { height: 3px; background: var(--panel-2); }
+.progress > span { display: block; height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--blue)); }
+
+/* ---- language toggle button ---- */
+.lang-toggle { font:600 .74rem/1 inherit; cursor:pointer; color:var(--accent-ink);
+  background:var(--accent-soft); border:1px solid var(--line);
+  padding:.32rem .7rem; border-radius:999px; min-width:3.2rem; }
+.lang-toggle:hover { filter:brightness(.97); }
+
+.wrap { max-width: 820px; margin: 0 auto; padding: 2.4rem 1.25rem 5rem; }
+
+/* ---- hero ---- */
+.hero { margin-bottom: 2rem; }
+.hero .part { font-size: .76rem; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--accent); font-weight: 700; margin-bottom: .55rem; }
+.hero h1 { font-size: 2.05rem; line-height: 1.2; letter-spacing: -.01em; font-weight: 750; }
+.hero .lead { margin-top: .9rem; font-size: 1.06rem; color: var(--muted); }
+.index-hero h1 { font-size: 2.3rem; }
+
+h2 { font-size: 1.32rem; margin: 2.4rem 0 .9rem; letter-spacing: -.01em;
+  display: flex; align-items: center; gap: .55rem; }
+h2::before { content: ""; width: 4px; height: 1.05em; background: var(--accent);
+  border-radius: 3px; display: inline-block; }
+h3 { font-size: 1.05rem; margin: 1.4rem 0 .5rem; }
+p { margin: .7rem 0; }
+ul, ol { margin: .6rem 0 .6rem 1.3rem; }
+li { margin: .3rem 0; }
+strong { color: var(--ink); font-weight: 680; }
+
+/* ---- callout cards ---- */
+.card { border-radius: var(--radius); padding: 1.05rem 1.2rem; margin: 1.2rem 0;
+  border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow); }
+.card .tag { font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+  display: inline-flex; align-items: center; gap: .4rem; margin-bottom: .5rem; }
+.card.note { border-left: 4px solid var(--accent); background: var(--accent-soft); }
+.card.note .tag { color: var(--accent-ink); }
+.card.tip { border-left: 4px solid var(--blue); background: var(--blue-soft); }
+.card.tip .tag { color: var(--blue); }
+.card.important { border-left: 4px solid var(--red); background: var(--red-soft); }
+.card.important .tag { color: var(--red); }
+.card.analogy { border-left: 4px solid var(--amber); background: var(--amber-soft); }
+.card.analogy .tag { color: var(--amber); }
+
+/* ---- code ---- */
+pre.code { background: var(--code-bg); color: var(--code-ink); padding: .9rem 1rem;
+  border-radius: 12px; overflow-x: auto; font-size: .83rem; line-height: 1.6;
+  margin: 1.1rem 0; box-shadow: var(--shadow); }
+pre.code .cm { color: #7d8aa3; }
+pre.code .kw { color: #c792ea; }
+pre.code .st { color: #c3e88d; }
+pre.code .nu { color: #f78c6c; }
+.code-fig { margin: 1.1rem 0; }
+.code-fig pre.code { margin: 0; }
+.code-cap { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+
+/* ---- accordion ---- */
+.accordion { border: 1px solid var(--line); border-radius: 12px; background: var(--panel);
+  margin: .7rem 0; box-shadow: var(--shadow); overflow: hidden; }
+.accordion > summary { cursor: pointer; padding: .85rem 1.1rem; font-weight: 650;
+  font-size: .96rem; list-style: none; display: flex; align-items: center;
+  gap: .6rem; user-select: none; }
+.accordion > summary::-webkit-details-marker { display: none; }
+.accordion > summary::after { content: "▶"; font-size: .68rem; color: var(--accent);
+  margin-left: auto; transition: transform .15s ease; }
+.accordion[open] > summary::after { transform: rotate(90deg); }
+.accordion > summary:hover { background: var(--panel-2); }
+.accordion[open] > summary { border-bottom: 1px solid var(--line); }
+.accordion .badge-num { background: var(--accent-soft); color: var(--accent-ink);
+  width: 1.6rem; height: 1.6rem; border-radius: 7px; display: inline-flex;
+  align-items: center; justify-content: center; font-size: .82rem; font-weight: 700;
+  flex-shrink: 0; }
+.accordion .hint { font-size: .72rem; color: var(--faint); font-weight: 400; }
+.acc-body { padding: .9rem 1.1rem 1.1rem; }
+.acc-body pre.code { font-size: .78rem; }
+
+/* ---- keypoints + source map ---- */
+.keypoints { background: var(--accent-soft); border: 1px solid var(--line);
+  border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;
+  margin: 1.3rem 0; }
+.keypoints .kp-title { font-weight: 700; color: var(--accent-ink); margin-bottom: .3rem; }
+.keypoints ul { margin: .3rem 0 0 1.2rem; }
+.srcmap { margin: 1.2rem 0; }
+.srcmap .kp-title { font-weight: 700; margin-bottom: .5rem; color: var(--accent-ink); }
+.srcmap code { background: var(--panel-2); padding: .1rem .4rem; border-radius: 6px; }
+
+/* ---- tables ---- */
+table.t { width: 100%; border-collapse: collapse; margin: 1.1rem 0; font-size: .9rem;
+  background: var(--panel); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+table.t th, table.t td { padding: .6rem .8rem; text-align: left;
+  border-bottom: 1px solid var(--line); vertical-align: top; }
+table.t th { background: var(--panel-2); font-size: .8rem; letter-spacing: .02em; }
+table.t tr:last-child td { border-bottom: none; }
+@media (max-width: 640px) {
+  table.t { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.t th, table.t td { padding: .5rem .6rem; }
+}
+
+/* ---- quiz ---- */
+.quiz { margin-top: 2.4rem; border-top: 2px dashed var(--line); padding-top: 1.2rem; }
+.quiz-q { background: var(--panel); border: 1px solid var(--line);
+  border-left: 4px solid var(--blue); border-radius: 12px; padding: .9rem 1.1rem;
+  margin: 1rem 0; box-shadow: var(--shadow); }
+.quiz-prompt { font-weight: 650; }
+.quiz-opts { list-style: upper-alpha; margin: .55rem 0 .6rem 1.5rem; }
+.quiz-ans { margin-top: .5rem; }
+.quiz-ans summary { cursor: pointer; color: var(--accent-ink); font-weight: 650;
+  font-size: .88rem; }
+.quiz-correct { font-weight: 700; color: var(--accent-ink); margin: .5rem 0 .3rem; }
+
+/* ---- lesson nav ---- */
+.lesson-nav { display: flex; justify-content: space-between; gap: 1rem;
+  margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.nav-link { flex: 1; padding: .85rem 1.1rem; border-radius: 12px; border: 1px solid var(--line);
+  background: var(--panel); box-shadow: var(--shadow); transition: .15s;
+  display: block; }
+.nav-link:hover { border-color: var(--accent); transform: translateY(-1px); }
+.nav-link.next { text-align: right; }
+.nav-dir { font-size: .72rem; color: var(--faint); text-transform: uppercase;
+  letter-spacing: .05em; display: block; }
+.nav-title { font-weight: 700; color: var(--ink); margin-top: .15rem; display: block; }
+
+.foot { margin-top: 2.6rem; padding-top: 1.2rem; border-top: 1px solid var(--line);
+  font-size: .8rem; color: var(--faint); }
+
+/* ---- index page ---- */
+.ix-part { margin-top: 1.6rem; }
+.ix-part h2 { font-size: 1.1rem; }
+.ix-list { list-style: none; margin: .7rem 0 0; display: grid; gap: .55rem; }
+.ix-list a { display: flex; align-items: center; gap: .9rem; padding: .8rem 1.05rem;
+  border-radius: 12px; background: var(--panel); border: 1px solid var(--line);
+  box-shadow: var(--shadow); transition: .15s; }
+.ix-list a:hover { border-color: var(--accent); transform: translateX(3px); }
+.ix-num { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft);
+  color: var(--accent-ink); display: inline-flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
+.ix-title { font-weight: 650; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="topbar-inner">
+<a class="home" href="../index.html"><span lang="zh">← 目录</span><span lang="en">← Contents</span></a>
+<span class="pill"><span lang="zh">第五部分 · 进阶能力</span><span lang="en">Part 5 · Advanced</span></span>
+<button id="langtoggle" class="lang-toggle" type="button" aria-label="切换语言 / Switch language">EN</button>
+</div><div class="progress"><span style="width:59%"></span></div></div>
+<div class="wrap">
+<div class="hero">
+<div class="part"><span lang="zh">第五部分 · 进阶能力</span><span lang="en">Part 5 · Advanced</span></div>
+<h1><span lang="zh">工作区 & 沙箱</span><span lang="en">Workspace & Sandbox</span></h1>
+</div>
+
+<nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="16-permission.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">权限系统</span><span lang="en">Permission System</span></span></a><a class="nav-link next" rel="next" href="18-mcp.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">MCP 集成</span><span lang="en">MCP Integration</span></span></a></nav>
+<footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
+</div>
+<script>(function(){var K='asvg-lang',r=document.documentElement,b=document.getElementById('langtoggle');function lab(){if(b)b.textContent=r.getAttribute('data-lang')==='en'?'中文':'EN';}function set(l){r.setAttribute('data-lang',l);r.setAttribute('lang',l);try{localStorage.setItem(K,l)}catch(e){}lab();}lab();if(b)b.addEventListener('click',function(){set(r.getAttribute('data-lang')==='en'?'zh':'en');});})();</script>
+</body>
+</html>
