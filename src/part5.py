@@ -545,103 +545,146 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "16-permission.html": [
-        (
-            "当权限裁决为「需确认」时会发生什么？",
-            "What happens when a permission decision is \"needs confirm\"?",
-            [
-                ("发出 <code>REQUIRE_USER_CONFIRM</code> 事件，等待人类批准",
-                 "It emits a <code>REQUIRE_USER_CONFIRM</code> event and waits for a human", True),
-                ("直接拒绝并报错", "It rejects with an error immediately", False),
-                ("忽略权限", "It ignores permissions", False),
-            ],
-            "需确认会触发 REQUIRE_USER_CONFIRM 事件，把人类介入接进事件流。",
-            "Needs-confirm triggers a REQUIRE_USER_CONFIRM event, bringing the human into the stream.",
-        ),
-    ],
-    "17-workspace.html": [
-        (
-            "AgentScope 内置哪几种工作区后端？",
-            "Which workspace backends does AgentScope ship?",
-            [
-                ("本地 / Docker / E2B", "Local / Docker / E2B", True),
-                ("只有本地", "Local only", False),
-                ("只有云端", "Cloud only", False),
-            ],
-            "WorkspaceBase 有 LocalWorkspace、DockerWorkspace、E2BWorkspace 三种实现。",
-            "WorkspaceBase has LocalWorkspace, DockerWorkspace and E2BWorkspace implementations.",
-        ),
-    ],
-    "18-mcp.html": [
-        (
-            "<code>MCPClient</code> 的作用是什么？",
-            "What does an <code>MCPClient</code> do?",
-            [
-                ("连接外部 MCP 服务器并把其工具接入 <code>Toolkit</code>",
-                 "Connect an external MCP server and bring its tools into a <code>Toolkit</code>", True),
-                ("训练嵌入模型", "Train embedding models", False),
-                ("渲染语音", "Render speech", False),
-            ],
-            "MCPClient 连接 MCP 服务器，通过 list_tools 把外部工具暴露为 ToolBase。",
-            "MCPClient connects to an MCP server and exposes its tools as ToolBase via list_tools.",
-        ),
-    ],
-    "19-state-tasks.html": [
-        (
-            "<code>AgentState</code> 的作用是什么？",
-            "What is <code>AgentState</code> for?",
-            [
-                ("保存 agent 的可持久化状态，支撑多会话隔离与续聊",
-                 "Holds the agent's persistable state, enabling multi-session isolation and resume",
-                 True),
-                ("存储 CSS 样式", "Storing CSS styles", False),
-                ("替换模型", "Replacing the model", False),
-            ],
-            "AgentState 持久化记忆/权限上下文等，是多会话与断点续聊的基础。",
-            "AgentState persists memory/permission context, the basis for multi-session and resume.",
-        ),
-    ],
-    "20-skills.html": [
-        (
-            "如何把一个技能加载给 agent？",
-            "How do you load a skill for an agent?",
-            [
-                ("通过 <code>Toolkit(skills_or_loaders=[...])</code>",
-                 "Via <code>Toolkit(skills_or_loaders=[...])</code>", True),
-                ("重新训练模型", "Retrain the model", False),
-                ("修改系统环境变量", "Edit system environment variables", False),
-            ],
-            "Toolkit 的 skills_or_loaders 接受路径 / Skill / 加载器来加载技能。",
-            "The Toolkit's skills_or_loaders accepts paths / Skills / loaders to load skills.",
-        ),
-    ],
-    "21-embeddings.html": [
-        (
-            "嵌入（embedding）在 agent 应用里主要支撑什么？",
-            "What do embeddings primarily enable in agent apps?",
-            [
-                ("检索 / RAG（按语义找相关内容）",
-                 "Retrieval / RAG (finding relevant content by meaning)", True),
-                ("权限控制", "Permission control", False),
-                ("语音合成", "Speech synthesis", False),
-            ],
-            "嵌入把文本变向量，用于按语义检索，是 RAG 的基础。",
-            "Embeddings turn text into vectors for semantic retrieval — the basis of RAG.",
-        ),
-    ],
-    "22-tts.html": [
-        (
-            "如何把语音能力接入 agent 而不改其主逻辑？",
-            "How do you add speech to an agent without changing its core logic?",
-            [
-                ("把 <code>TTSMiddleware</code> 加入 <code>middlewares=[...]</code>",
-                 "Add <code>TTSMiddleware</code> to <code>middlewares=[...]</code>", True),
-                ("重写 Agent 类", "Rewrite the Agent class", False),
-                ("改 LLM 的权重", "Edit the LLM's weights", False),
-            ],
-            "TTSMiddleware 作为中间件挂载，自动把文本回复合成语音。",
-            "TTSMiddleware is attached as middleware and automatically synthesizes text replies to speech.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["16-permission.html"] = [
+    (
+        "关于默认权限模式（<code>PermissionMode.DEFAULT</code>），下列哪项正确？",
+        "Which statement about the default permission mode (<code>PermissionMode.DEFAULT</code>) is correct?",
+        [
+            ("写文件等敏感操作会暂停并发出 <code>REQUIRE_USER_CONFIRM</code>，把确认结果回传后才继续",
+             "Sensitive ops like writing files pause and emit <code>REQUIRE_USER_CONFIRM</code>; "
+             "you feed the confirmation back to continue", True),
+            ("默认就是 <code>BYPASS</code>，所有工具调用都直接放行",
+             "The default is <code>BYPASS</code>, so every tool call is allowed straight through", False),
+            ("被拦下的工具会直接抛错并终止整个回复",
+             "A gated tool throws an error and aborts the whole reply", False),
+        ],
+        "默认模式并非 BYPASS：敏感操作会暂停等待人类批准（回传 UserConfirmResultEvent 即可继续），"
+        "既不会静默放行，也不会崩溃。",
+        "The default is not BYPASS: sensitive ops pause for human approval (feed a "
+        "UserConfirmResultEvent back to resume) — neither silently allowed nor crashing.",
+    ),
+]
+
+QUIZZES["17-workspace.html"] = [
+    (
+        "<code>Offloader</code> 在工作区里解决什么问题？",
+        "What problem does the <code>Offloader</code> solve in a workspace?",
+        [
+            ("把超长上下文 / 大工具结果卸载到工作区（如写入文件），需要时再取回，避免撑爆上下文窗口",
+             "It offloads oversized context / large tool results to the workspace (e.g. to files) "
+             "and fetches them back when needed, so the context window doesn't overflow", True),
+            ("它对每次工具调用作出放行 / 拒绝 / 需确认的裁决",
+             "It renders an allow / deny / needs-confirm decision for each tool call", False),
+            ("它在多台机器间做负载均衡，把任务分发出去",
+             "It load-balances tasks by distributing them across multiple machines", False),
+        ],
+        "Offloader 负责「卸载」超长上下文与被截断的工具结果并按需取回；放行/拒绝是权限引擎（第 16 课）的职责。",
+        "The Offloader offloads oversized context and truncated tool results and fetches them back; "
+        "allow/deny is the permission engine's job (lesson 16).",
+    ),
+]
+
+QUIZZES["18-mcp.html"] = [
+    (
+        "关于通过 <code>MCPClient</code> 接入的工具，下列哪项正确？",
+        "Which statement about tools brought in via an <code>MCPClient</code> is correct?",
+        [
+            ("它们在 <code>Toolkit</code> 中表现为 <code>MCPTool</code>，和本地工具一样受权限系统管控",
+             "They appear as <code>MCPTool</code> in the <code>Toolkit</code> and are gated by the "
+             "permission system just like local tools", True),
+            ("它们来自外部服务器，因此绕过权限系统直接执行",
+             "Because they come from an external server, they bypass the permission system and run "
+             "directly", False),
+            ("只能用 <code>HttpMCPConfig</code> 连远程服务器，不支持本地进程",
+             "You can only use <code>HttpMCPConfig</code> for remote servers; local processes aren't "
+             "supported", False),
+        ],
+        "MCP 工具在 Toolkit 内是 MCPTool，同样经权限引擎把关；连接方式有 StdioMCPConfig（本地子进程）"
+        "与 HttpMCPConfig（远程 HTTP）两种。",
+        "MCP tools are MCPTool inside the Toolkit and are gated by the permission engine; connect via "
+        "StdioMCPConfig (local subprocess) or HttpMCPConfig (remote HTTP).",
+    ),
+]
+
+QUIZZES["19-state-tasks.html"] = [
+    (
+        "关于 <code>AgentState</code> 与任务规划工具（<code>TaskCreate</code> 等），下列哪项正确？",
+        "Which statement about <code>AgentState</code> and the task-planning tools "
+        "(<code>TaskCreate</code>, \u2026) is correct?",
+        [
+            ("规划工具读写的任务清单（<code>tasks_context</code>）就保存在 <code>AgentState</code> 里，"
+             "因此存档能连同计划一起续聊",
+             "The task list (<code>tasks_context</code>) the planning tools read/write lives inside "
+             "<code>AgentState</code>, so a saved state resumes with the plan intact", True),
+            ("任务清单单独存放，与 <code>AgentState</code> 无关",
+             "The task list is stored separately and has nothing to do with <code>AgentState</code>", False),
+            ("必须显式传入 <code>state</code>，否则 Agent 无法启动",
+             "You must pass <code>state</code> explicitly, or the Agent won't start", False),
+        ],
+        "TaskContext 是 AgentState 的一部分（tasks_context），规划工具就读写它；不传 state 时 Agent 会自动新建。",
+        "TaskContext is part of AgentState (tasks_context) that the planning tools read/write; if no "
+        "state is passed the Agent creates one.",
+    ),
+]
+
+QUIZZES["20-skills.html"] = [
+    (
+        "在 AgentScope 里，「写一个技能（Skill）」本质上是在做什么？",
+        "In AgentScope, what does \u201cwriting a skill\u201d essentially amount to?",
+        [
+            ("写一份结构化的操作手册——一个带 <code>name</code>/<code>description</code>/<code>markdown</code> "
+             "的目录，由 <code>LocalSkillLoader</code> 从本地加载",
+             "Writing a structured playbook — a directory with <code>name</code>/"
+             "<code>description</code>/<code>markdown</code>, loaded from disk by "
+             "<code>LocalSkillLoader</code>", True),
+            ("微调 / 重训模型，把新能力「学」进权重里",
+             "Fine-tuning / retraining the model so the new ability is baked into its weights", False),
+            ("写一个新的 Python 工具类并注册为 <code>FunctionTool</code>",
+             "Writing a new Python tool class and registering it as a <code>FunctionTool</code>", False),
+        ],
+        "技能 = 目录 + Markdown 文档（name/description/具体做法），用 Toolkit(skills_or_loaders=[...]) 加载——"
+        "既不改模型权重，也不等同于写一个工具类。",
+        "A skill = a directory + a Markdown doc (name/description/how-to), loaded via "
+        "skills_or_loaders — no weight changes, and not the same as coding a tool class.",
+    ),
+]
+
+QUIZZES["21-embeddings.html"] = [
+    (
+        "关于 AgentScope 的嵌入（embedding）支持，下列哪项正确？",
+        "Which statement about AgentScope's embedding support is correct?",
+        [
+            ("它提供嵌入模型 + 缓存这块基石，但向量库（最近邻检索）留给你的应用自选",
+             "It provides the embedding-model + caching foundation, but leaves the vector store "
+             "(nearest-neighbor search) to your application", True),
+            ("它自带向量数据库，开箱即可存储并检索向量",
+             "It ships a built-in vector database, so you can store and search vectors out of the box", False),
+            ("嵌入模型调用是同步的，直接返回向量列表",
+             "Embedding model calls are synchronous and return a plain list of vectors", False),
+        ],
+        "AgentScope 只提供嵌入与缓存的基石，向量库由你选型；嵌入模型是 async 可调用对象，返回 EmbeddingResponse。",
+        "AgentScope provides only the embedding + cache foundation; you choose the vector store. "
+        "Embedding models are async-callable and return an EmbeddingResponse.",
+    ),
+]
+
+QUIZZES["22-tts.html"] = [
+    (
+        "想要「边生成边出声」的低延迟语音，应选用哪种 TTS 模型？",
+        "For low-latency \u201cspeak as it's generated\u201d audio, which TTS model should you use?",
+        [
+            ("<code>DashScopeRealtimeTTSModel</code>（实时流式合成）",
+             "<code>DashScopeRealtimeTTSModel</code> (realtime streaming synthesis)", True),
+            ("<code>DashScopeTTSModel</code>（等整段文本就绪后一次性合成）",
+             "<code>DashScopeTTSModel</code> (one-shot synthesis after the full text is ready)", False),
+            ("<code>TTSMiddleware</code>，它本身就是一个能直接发声的模型",
+             "<code>TTSMiddleware</code>, which is itself a model that produces audio", False),
+        ],
+        "低延迟流式用 DashScopeRealtimeTTSModel，整段一次性合成用 DashScopeTTSModel；"
+        "TTSMiddleware 只是把所选 TTS 模型接进回复流的中间件，本身不合成。",
+        "Use DashScopeRealtimeTTSModel for low-latency streaming and DashScopeTTSModel for one-shot; "
+        "TTSMiddleware is just the wiring that pipes a chosen TTS model into the reply flow, not a synthesizer.",
+    ),
+]

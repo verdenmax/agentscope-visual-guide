@@ -323,47 +323,55 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "09-event-system.html": [
-        (
-            "块类事件（如文本块）遵循什么顺序？",
-            "What order do block events (e.g. text blocks) follow?",
-            [
-                ("START → DELTA* → END", "START → DELTA* → END", True),
-                ("只有一个 END 事件", "Only a single END event", False),
-                ("随机顺序", "Random order", False),
-            ],
-            "每个块以 START 开始、若干 DELTA 增量、END 结束，便于前端增量渲染。",
-            "Each block opens with START, streams DELTA chunks, and closes with END, enabling "
-            "incremental rendering.",
-        ),
-    ],
-    "10-streaming.html": [
-        (
-            "如何正确消费 <code>reply_stream</code>？",
-            "How do you correctly consume <code>reply_stream</code>?",
-            [
-                ("用 <code>async for</code> 在异步函数里遍历事件",
-                 "Iterate events with <code>async for</code> inside an async function", True),
-                ("用普通 <code>for</code> 循环", "With a plain <code>for</code> loop", False),
-                ("直接 <code>print(reply_stream)</code>", "Just <code>print(reply_stream)</code>", False),
-            ],
-            "reply_stream 是 async generator，必须用 async for 消费。",
-            "reply_stream is an async generator and must be consumed with async for.",
-        ),
-    ],
-    "11-formatter.html": [
-        (
-            "<code>FormatterBase.format</code> 的关键特征是什么？",
-            "What is a key characteristic of <code>FormatterBase.format</code>?",
-            [
-                ("它是 async 方法，返回 <code>list[dict]</code>",
-                 "It is an async method returning <code>list[dict]</code>", True),
-                ("它返回一个字符串", "It returns a string", False),
-                ("它训练模型", "It trains the model", False),
-            ],
-            "format 是异步方法，把 Msg 列表转成厂商请求所需的 list[dict]。",
-            "format is async and turns the Msg list into the list[dict] the vendor request needs.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["09-event-system.html"] = [
+    (
+        "关于 <code>REPLY_END</code> 和块的 <code>END</code> 事件，下面哪句正确？",
+        "Which statement about <code>REPLY_END</code> and a block's <code>END</code> event is correct?",
+        [
+            ("它们只标记「结束」，<strong>不</strong>携带最终消息；最终 <code>AssistantMsg</code> 要靠累积 DELTA 或用 <code>reply()</code> 拿",
+             "They only mark \u201cdone\u201d and do <strong>not</strong> carry the final message; the final <code>AssistantMsg</code> comes from accumulating DELTAs or from <code>reply()</code>", True),
+            ("<code>REPLY_END</code> 里就装着完整的最终回复文本",
+             "<code>REPLY_END</code> contains the complete final reply text", False),
+            ("<code>TEXT_BLOCK_END</code> 携带这一块拼好的完整文本",
+             "<code>TEXT_BLOCK_END</code> carries the fully assembled text of that block", False),
+        ],
+        "<code>END</code> 类事件只表示「这一段结束」，<code>ReplyEndEvent</code> 只带 <code>session_id</code> / <code>reply_id</code>。要完整内容：累积各 <code>DELTA</code>，或直接用 <code>agent.reply()</code>。",
+        "<code>END</code> events only signal \u201cthis segment is done\u201d; <code>ReplyEndEvent</code> carries just <code>session_id</code> / <code>reply_id</code>. For the full content, accumulate the <code>DELTA</code>s or use <code>agent.reply()</code>.",
+    ),
+]
+
+QUIZZES["10-streaming.html"] = [
+    (
+        "流式输出时，想把模型的文字实时打印出来，应该读取什么？",
+        "While streaming, to print the model's text live, what should you read?",
+        [
+            ("直接 <code>print(evt)</code>，事件本身就是那段文字",
+             "Just <code>print(evt)</code> — the event itself is the text", False),
+            ("在 <code>TEXT_BLOCK_DELTA</code> 事件上读取 <code>evt.delta</code>（增量文本）并自行累积",
+             "Read <code>evt.delta</code> (the incremental text) on <code>TEXT_BLOCK_DELTA</code> events and accumulate it yourself", True),
+            ("等 <code>REPLY_END</code>，从它里面取完整文本",
+             "Wait for <code>REPLY_END</code> and read the full text from it", False),
+        ],
+        "增量文本在 <code>evt.delta</code> 里，<code>print(evt)</code> 只会打印事件的 repr。把每个 <code>DELTA</code> 的 <code>delta</code> 拼起来就是最终文本；<code>REPLY_END</code> 不含文本。",
+        "The incremental text lives in <code>evt.delta</code>; <code>print(evt)</code> only dumps the event's repr. Concatenate each <code>DELTA</code>'s <code>delta</code> for the final text; <code>REPLY_END</code> carries none.",
+    ),
+]
+
+QUIZZES["11-formatter.html"] = [
+    (
+        "每个厂商都提供 <strong>Chat</strong> 和 <strong>MultiAgent</strong> 两个 formatter，它们的区别是什么？",
+        "Each vendor ships both a <strong>Chat</strong> and a <strong>MultiAgent</strong> formatter. What is the difference?",
+        [
+            ("Chat 给单个 agent 用；MultiAgent 会自己同时调用多个模型并做编排",
+             "Chat is for one agent; MultiAgent itself calls several models at once and orchestrates them", False),
+            ("Chat 面向单一对话机器人；MultiAgent 面向多方 / 多 agent 场景，会按发言者分组消息",
+             "Chat targets a single chatbot dialogue; MultiAgent targets multi-party / multi-agent settings and groups messages by speaker", True),
+            ("Chat 的 <code>format</code> 是同步的，MultiAgent 的是异步的",
+             "Chat's <code>format</code> is synchronous; MultiAgent's is asynchronous", False),
+        ],
+        "两者都只把 <code>Msg</code> 列表转成 <code>list[dict]</code>（<code>format</code> 都是 async），不做模型编排。区别在场景：Chat 单对话，MultiAgent 多方并按发言者分组。",
+        "Both only turn the <code>Msg</code> list into <code>list[dict]</code> (their <code>format</code> is async) and do no model orchestration. The difference is the scenario: Chat for single dialogue, MultiAgent for multi-party with speaker grouping.",
+    ),
+]

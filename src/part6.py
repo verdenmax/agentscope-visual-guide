@@ -319,50 +319,75 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "23-agent-service.html": [
-        (
-            "<code>create_app</code> 必需的三个基础设施后端是什么？",
-            "What three infrastructure backends does <code>create_app</code> require?",
-            [
-                ("storage、message_bus、workspace_manager",
-                 "storage, message_bus, workspace_manager", True),
-                ("只有一个数据库连接", "Just a single database connection", False),
-                ("前端、CSS、字体", "Frontend, CSS, fonts", False),
-            ],
-            "create_app(storage, message_bus, workspace_manager, ...) 返回一个 FastAPI 应用。",
-            "create_app(storage, message_bus, workspace_manager, ...) returns a FastAPI app.",
-        ),
-    ],
-    "24-message-bus.html": [
-        (
-            "消息总线除了发布/订阅事件，还提供什么分布式能力？",
-            "Beyond pub/sub of events, what distributed capability does the message bus add?",
-            [
-                ("注册表 + 后台任务追踪 + 跨 worker 取消",
-                 "A registry + background-task tracking + cross-worker cancellation", True),
-                ("训练嵌入模型", "Training embedding models", False),
-                ("渲染 HTML", "Rendering HTML", False),
-            ],
-            "registry_* 与 bg_task_* 原语支撑分布式后台任务追踪与跨 worker 取消。",
-            "The registry_* and bg_task_* primitives power distributed background-task tracking "
-            "and cross-worker cancellation.",
-        ),
-    ],
-    "25-agent-team.html": [
-        (
-            "领导 agent 如何生成一个工作 agent？",
-            "How does a leader agent spawn a worker agent?",
-            [
-                ("调用 <code>AgentCreate</code>，指定 <code>subagent_type</code> 模板",
-                 "By calling <code>AgentCreate</code> with a <code>subagent_type</code> template",
-                 True),
-                ("直接修改源码", "By editing the source code directly", False),
-                ("重启服务器", "By restarting the server", False),
-            ],
-            "AgentCreate 按 SubAgentTemplate 的 type 生成队员；模板在 create_app 处注册。",
-            "AgentCreate spawns a worker from a SubAgentTemplate's type; templates are registered "
-            "at create_app.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["23-agent-service.html"] = [
+    (
+        "关于 <code>create_app</code> 三大后端自带的实现，下列哪项正确？",
+        "Which statement about the backend implementations shipped with "
+        "<code>create_app</code> is correct?",
+        [
+            ("<code>storage</code> 与 <code>message_bus</code> 目前只有 Redis 实现，"
+             "只有 <code>workspace_manager</code> 有本地后端",
+             "<code>storage</code> and <code>message_bus</code> ship Redis-only today; "
+             "only <code>workspace_manager</code> has a local backend", True),
+            ("三大后端都有本地实现，不依赖 Redis 也能直接跑起来",
+             "All three backends have local implementations, so you can run without Redis",
+             False),
+            ("<code>storage</code> 有本地实现，但 <code>message_bus</code> 与 "
+             "<code>workspace_manager</code> 必须用 Redis",
+             "<code>storage</code> has a local backend, but <code>message_bus</code> and "
+             "<code>workspace_manager</code> must use Redis", False),
+        ],
+        "三大后端（storage / message_bus / workspace_manager）都是统一接口，但 storage 与 "
+        "message_bus 目前只发布了 Redis 实现，运行前需先启动 Redis；只有 workspace 有本地 / "
+        "Docker / E2B 等实现。",
+        "The three backends (storage / message_bus / workspace_manager) sit behind uniform "
+        "interfaces, but storage and the message bus ship Redis-only today, so you must start "
+        "Redis first; only the workspace has local / Docker / E2B implementations.",
+    ),
+]
+
+QUIZZES["24-message-bus.html"] = [
+    (
+        "除了发布 / 订阅事件，消息总线还承担什么职责？",
+        "Beyond publishing / subscribing events, what else does the message bus do?",
+        [
+            ("分布式注册表 + 后台任务追踪 + 跨 worker 取消",
+             "A distributed registry + background-task tracking + cross-worker cancellation",
+             True),
+            ("它只负责事件的发布与订阅，没有其他职责",
+             "Nothing else — it only publishes and subscribes events", False),
+            ("持久化会话状态与记忆，取代 storage 后端",
+             "Persisting session state and memory, replacing the storage backend", False),
+        ],
+        "<code>registry_*</code> 与 <code>bg_task_*</code> 原语让总线支撑后台任务卸载与跨 "
+        "worker 取消等分布式能力；持久化会话状态是 storage 后端（第23课）的职责，并非消息总线。",
+        "The <code>registry_*</code> and <code>bg_task_*</code> primitives let the bus power "
+        "background-task offloading and cross-worker cancellation; persisting session state is "
+        "the storage backend's job (lesson 23), not the message bus's.",
+    ),
+]
+
+QUIZZES["25-agent-team.html"] = [
+    (
+        "领导 agent 在运行时如何获得一个工作 agent？",
+        "At runtime, how does a leader agent get a worker agent?",
+        [
+            ("调用 <code>AgentCreate</code>，传入与已注册模板匹配的 <code>subagent_type</code>",
+             "By calling <code>AgentCreate</code> with a <code>subagent_type</code> matching a "
+             "registered template", True),
+            ("队员是预先写死的固定角色，运行时不能动态创建",
+             "Workers are hard-coded fixed roles and cannot be created at runtime", False),
+            ("直接用 <code>TeamSay</code> 向一个尚不存在的名字发消息，系统会自动建好队员",
+             "By calling <code>TeamSay</code> to a name that doesn't exist yet, which "
+             "auto-creates the worker", False),
+        ],
+        "领导用 <code>AgentCreate(subagent_type=...)</code> 按 <code>SubAgentTemplate</code> "
+        "动态生成队员（模板在 <code>create_app</code> 处注册）；<code>TeamSay</code> 只能向"
+        "已存在的队员发消息，不会创建 agent。",
+        "The leader spawns a worker dynamically with <code>AgentCreate(subagent_type=...)</code> "
+        "from a <code>SubAgentTemplate</code> (registered at <code>create_app</code>); "
+        "<code>TeamSay</code> only messages an existing teammate and never creates one.",
+    ),
+]

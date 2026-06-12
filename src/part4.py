@@ -315,63 +315,78 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "12-agent-internals.html": [
-        (
-            "一次回复在内部是如何进行的？",
-            "How does a reply proceed internally?",
-            [
-                ("推理→行动的循环，工具调用经权限引擎把关",
-                 "A reasoning→acting loop with tool calls gated by the permission engine", True),
-                ("一次模型调用就结束", "A single model call and done", False),
-                ("先执行所有工具再推理一次", "Run all tools first, then reason once", False),
-            ],
-            "Agent 在推理-行动循环中迭代，每个工具调用先经 PermissionEngine 判定。",
-            "The agent iterates a reasoning-acting loop; each tool call is first judged by the "
-            "PermissionEngine.",
-        ),
-    ],
-    "13-toolkit-internals.html": [
-        (
-            "关于 <code>get_tool_schemas</code>，下列哪项正确？",
-            "Which is true about <code>get_tool_schemas</code>?",
-            [
-                ("它是 async 方法，返回工具的 JSON schema",
-                 "It is async and returns the tools' JSON schemas", True),
-                ("它是同步方法", "It is synchronous", False),
-                ("它执行工具", "It executes tools", False),
-            ],
-            "get_tool_schemas 是异步方法（取代旧的 get_function_schemas），需 await。",
-            "get_tool_schemas is async (replacing the old get_function_schemas) and must be awaited.",
-        ),
-    ],
-    "14-model-internals.html": [
-        (
-            "模型调用返回什么归一化结构？",
-            "What normalized structure does a model call return?",
-            [
-                ("<code>ChatResponse</code>（内容块 + <code>ChatUsage</code>）",
-                 "<code>ChatResponse</code> (content blocks + <code>ChatUsage</code>)", True),
-                ("一个纯字符串", "A plain string", False),
-                ("厂商的原始 JSON", "The vendor's raw JSON", False),
-            ],
-            "ChatModelBase 把各厂商返回归一化成 ChatResponse，含内容块与用量。",
-            "ChatModelBase normalizes vendor outputs into a ChatResponse with content blocks and usage.",
-        ),
-    ],
-    "15-middleware.html": [
-        (
-            "中间件的主要价值是什么？",
-            "What is middleware's main value?",
-            [
-                ("不改 Agent 源码即可在循环各阶段插入逻辑",
-                 "Insert logic at loop stages without editing Agent source", True),
-                ("替换大语言模型", "Replacing the LLM", False),
-                ("加密网络流量", "Encrypting network traffic", False),
-            ],
-            "中间件通过 on_* 钩子在循环各阶段插入逻辑，无需改动 agent 主逻辑。",
-            "Middleware uses on_* hooks to inject logic at loop stages without changing the "
-            "agent's core logic.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["12-agent-internals.html"] = [
+    (
+        "在推理-行动循环中，一个工具执行完之后，紧接着会发生什么？",
+        "In the reasoning-acting loop, what happens right after a tool finishes executing?",
+        [
+            ("结果被「观察」回上下文，循环回到推理，可能再触发新调用，直到模型给出最终答案",
+             "The result is observed back into context and the loop returns to reasoning (possibly "
+             "triggering more calls) until the model produces a final answer", True),
+            ("工具的原始输出就是最终回复，循环立即结束",
+             "The tool's raw output becomes the final reply and the loop ends immediately", False),
+            ("Agent 跳过推理，直接连续把其余工具全部执行完",
+             "The agent skips reasoning and just runs all the remaining tools back-to-back", False),
+        ],
+        "工具结果回灌上下文后循环返回推理——这正是「回复是一个循环，而非一次性调用」。",
+        "Tool results feed back into context and the loop returns to reasoning — that's why a reply "
+        "is a loop, not a one-shot call.",
+    ),
+]
+
+QUIZZES["13-toolkit-internals.html"] = [
+    (
+        "关于 <code>get_tool_schemas</code>，下列哪项正确？",
+        "Which is true about <code>get_tool_schemas</code>?",
+        [
+            ("它是 async 方法，返回工具的 JSON schema",
+             "It is async and returns the tools' JSON schemas", True),
+            ("它是同步方法", "It is synchronous", False),
+            ("它执行工具", "It executes tools", False),
+        ],
+        "get_tool_schemas 是异步方法（取代旧的 get_function_schemas），需 await。",
+        "get_tool_schemas is async (replacing the old get_function_schemas) and must be awaited.",
+    ),
+]
+
+QUIZZES["14-model-internals.html"] = [
+    (
+        "为什么换模型厂商（如 OpenAI → DashScope）通常不必改业务代码？",
+        "Why can you usually swap model vendors (e.g. OpenAI \u2192 DashScope) without touching business code?",
+        [
+            ("<code>ChatModelBase</code> 把各厂商返回归一化成统一的 <code>ChatResponse</code>（内容块 + 用量），"
+             "Agent 只面对这个统一结构",
+             "<code>ChatModelBase</code> normalizes every vendor's output into a uniform "
+             "<code>ChatResponse</code> (content blocks + usage) the Agent works against", True),
+            ("Agent 直接解析每家厂商的原始 JSON，并为每家写了适配分支",
+             "The Agent parses each vendor's raw JSON with a per-vendor branch", False),
+            ("各家厂商的 API 返回格式本来就完全一样，无需任何转换",
+             "All vendors' APIs already return the exact same format, so no conversion is needed", False),
+        ],
+        "归一化发生在 ChatModelBase 层：它把不同厂商的原始返回统一成 ChatResponse，Agent 从不直接碰原始 JSON。",
+        "Normalization happens in ChatModelBase: it unifies vendors' raw outputs into a ChatResponse "
+        "and the Agent never touches raw JSON.",
+    ),
+]
+
+QUIZZES["15-middleware.html"] = [
+    (
+        "关于中间件（Middleware），下列哪项正确？",
+        "Which statement about middleware is correct?",
+        [
+            ("它通过 <code>on_*</code> 钩子在循环各阶段插入逻辑，无需修改 Agent 源码",
+             "It inserts logic at loop stages via <code>on_*</code> hooks, with no change to the "
+             "Agent's source", True),
+            ("它只能被动记录日志，不能改写系统提示或增删工具",
+             "It can only passively log; it cannot rewrite the system prompt or add/remove tools", False),
+            ("要使用它必须继承并改写 <code>Agent</code> 类",
+             "To use it you must subclass and modify the <code>Agent</code> class", False),
+        ],
+        "中间件正是为「不改 Agent 源码」而生：通过 on_system_prompt、list_tools 等钩子既能观测也能改写，"
+        "用 Agent(middlewares=[...]) 挂载。",
+        "Middleware exists precisely to avoid editing Agent source: hooks like on_system_prompt and "
+        "list_tools let it both observe and modify; attach via Agent(middlewares=[...]).",
+    ),
+]

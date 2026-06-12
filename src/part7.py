@@ -280,49 +280,72 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "26-custom-tools.html": [
-        (
-            "把一个普通 Python 函数变成工具，最简单的方式是？",
-            "What's the simplest way to turn a plain Python function into a tool?",
-            [
-                ("用 <code>FunctionTool</code> 包装它",
-                 "Wrap it with <code>FunctionTool</code>", True),
-                ("手写 JSON schema 并解析", "Hand-write a JSON schema and parse it", False),
-                ("把它训练进模型", "Train it into the model", False),
-            ],
-            "FunctionTool 从函数签名与 docstring 自动生成 schema，无需手写。",
-            "FunctionTool auto-generates the schema from the signature and docstring — no hand-writing.",
-        ),
-    ],
-    "27-custom-middleware.html": [
-        (
-            "自定义中间件的钩子里应如何继续执行下一层？",
-            "Inside a custom middleware hook, how do you proceed to the next layer?",
-            [
-                ("<code>await next_handler(**input_kwargs)</code>",
-                 "<code>await next_handler(**input_kwargs)</code>", True),
-                ("直接 <code>return None</code>", "Just <code>return None</code>", False),
-                ("抛出异常", "Raise an exception", False),
-            ],
-            "钩子收到 next_handler，调用它把控制传给下一层中间件或原方法。",
-            "The hook receives next_handler and calls it to pass control to the next middleware "
-            "or the original method.",
-        ),
-    ],
-    "28-capstone.html": [
-        (
-            "一个完整的 agent 通常由哪些构件组合而成？",
-            "What building blocks compose a complete agent?",
-            [
-                ("模型 + 凭证 + 工具 + 权限 + 工作区 + 中间件",
-                 "model + credential + tools + permission + workspace + middleware", True),
-                ("只有一个提示词", "Just a single prompt", False),
-                ("只有一个数据库", "Just a database", False),
-            ],
-            "AgentScope 让你组合少数清晰构件，搭出可观测、可控、可扩展的 agent。",
-            "AgentScope lets you compose a few clear building blocks into an observable, "
-            "controllable, extensible agent.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["26-custom-tools.html"] = [
+    (
+        "把一个普通 Python 函数变成工具，最简单的方式是？",
+        "What's the simplest way to turn a plain Python function into a tool?",
+        [
+            ("用 <code>FunctionTool</code> 包装它——schema 由签名 + docstring 自动生成",
+             "Wrap it with <code>FunctionTool</code> — the schema is auto-generated from the "
+             "signature + docstring", True),
+            ("自己手写 JSON schema 并解析参数",
+             "Hand-write the JSON schema and parse the arguments yourself", False),
+            ("继承 <code>ToolBase</code> 并实现 <code>check_permissions</code>",
+             "Subclass <code>ToolBase</code> and implement <code>check_permissions</code>", False),
+        ],
+        "<code>FunctionTool(your_function)</code> 会从类型注解与 docstring 自动生成 schema，"
+        "无需手写；继承 <code>ToolBase</code> 是需要自定义权限 / 流式 / 有状态时的进阶（更繁琐）路径。",
+        "<code>FunctionTool(your_function)</code> auto-derives the schema from type hints and "
+        "the docstring — no hand-writing; subclassing <code>ToolBase</code> is the more involved "
+        "path for custom permissions / streaming / stateful behavior.",
+    ),
+]
+
+QUIZZES["27-custom-middleware.html"] = [
+    (
+        "在自定义中间件的钩子里，如何正确地把控制传给下一层？",
+        "Inside a custom middleware hook, how do you correctly pass control to the next layer?",
+        [
+            ("调用并 await：<code>response = await next_handler(**input_kwargs)</code>，再返回结果",
+             "Call and await it: <code>response = await next_handler(**input_kwargs)</code>, "
+             "then return the result", True),
+            ("调用 <code>next_handler(**input_kwargs)</code> 但不加 <code>await</code>",
+             "Call <code>next_handler(**input_kwargs)</code> but without <code>await</code>",
+             False),
+            ("直接 <code>return None</code>，框架会自动继续往下执行",
+             "Just <code>return None</code>; the framework continues down the chain automatically",
+             False),
+        ],
+        "钩子是 async 的，必须 <code>await next_handler(...)</code> 才会真正进入下一层；忘记 "
+        "<code>await</code> 只会拿到一个未执行的协程，而 <code>return None</code> 会中断洋葱链、"
+        "丢掉下游结果。",
+        "Hooks are async, so you must <code>await next_handler(...)</code> to actually enter the "
+        "next layer; forgetting <code>await</code> yields an un-executed coroutine, and "
+        "<code>return None</code> breaks the onion chain and drops the downstream result.",
+    ),
+]
+
+QUIZZES["28-capstone.html"] = [
+    (
+        "一个可用于生产的完整 agent 通常如何构成？",
+        "How is a complete, production-ready agent typically composed?",
+        [
+            ("模型 + 凭证 + 工具 + 权限 + 工作区 + 中间件，经统一事件流消费",
+             "model + credential + tools + permission + workspace + middleware, consumed via "
+             "the unified event stream", True),
+            ("只要一个足够好的系统提示词就够了",
+             "A single, good-enough system prompt is all you need", False),
+            ("把所有逻辑写进一段复杂的编排代码，而不是组合清晰的构件",
+             "Hand-write all the logic in one complex orchestration script instead of composing "
+             "clear building blocks", False),
+        ],
+        "真实 agent 由少数清晰构件组合而成（模型 / 凭证 / 工具 / 权限 / 工作区 / 中间件），并经"
+        "事件流消费；这正体现「组合清晰构件 > 堆砌复杂编排」，单靠一个提示词远远不够。",
+        "A real agent composes a few clear building blocks (model / credential / tools / "
+        "permission / workspace / middleware) consumed via the event stream; this embodies "
+        "\u201ccomposing clear building blocks beats piling on complex orchestration\u201d — a single "
+        "prompt is nowhere near enough.",
+    ),
+]

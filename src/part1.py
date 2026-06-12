@@ -448,66 +448,69 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "00-setup.html": [
-        (
-            "运行 AgentScope 代码前，最先要做的两件事是？",
-            "What are the first two things to do before running AgentScope code?",
-            [
-                ("安装包（Python 3.11+）并把 API key 设为环境变量",
-                 "Install the package (Python 3.11+) and set the API key as an env var", True),
-                ("先训练一个模型", "Train a model first", False),
-                ("搭一个前端", "Build a frontend first", False),
-            ],
-            "先 uv pip install agentscope（Python 3.11+），再用环境变量配置 API key。",
-            "First uv pip install agentscope (Python 3.11+), then set the API key via an env var.",
-        ),
-    ],
-    "01-what-is-agentscope.html": [
-        (
-            "AgentScope 的核心定位是什么？",
-            "What is AgentScope's core role?",
-            [
-                ("训练大语言模型", "Training large language models", False),
-                ("为模型提供周边管道（工具/事件/权限等）的多智能体框架",
-                 "A multi-agent framework providing the plumbing (tools/events/"
-                 "permissions) around a model", True),
-                ("一个向量数据库", "A vector database", False),
-            ],
-            "AgentScope 不训练模型，而是把模型接进真实应用，负责工具、事件、权限等周边能力。",
-            "AgentScope does not train models; it wires a model into real apps, handling "
-            "tools, events, permissions and other surrounding capabilities.",
-        ),
-    ],
-    "02-architecture.html": [
-        (
-            "哪个模块负责把 <code>Msg</code> 列表转换成各厂商要求的请求格式？",
-            "Which module turns a <code>Msg</code> list into each vendor's request format?",
-            [
-                ("<code>formatter</code>", "<code>formatter</code>", True),
-                ("<code>permission</code>", "<code>permission</code>", False),
-                ("<code>workspace</code>", "<code>workspace</code>", False),
-            ],
-            "formatter 模块负责把统一的消息对象适配成不同厂商的具体请求格式。",
-            "The formatter module adapts the unified message objects into each vendor's "
-            "concrete request format.",
-        ),
-    ],
-    "03-lifecycle.html": [
-        (
-            "<code>reply_stream</code> 返回的是什么，应如何消费？",
-            "What does <code>reply_stream</code> return and how is it consumed?",
-            [
-                ("一个普通字符串，直接打印",
-                 "A plain string you print directly", False),
-                ("一个 async generator，用 <code>async for</code> 遍历事件",
-                 "An async generator iterated with <code>async for</code> over events",
-                 True),
-                ("一个文件路径", "A file path", False),
-            ],
-            "reply_stream 是异步生成器，逐个产出事件；只要最终结果时用 reply()。",
-            "reply_stream is an async generator that yields events one by one; use "
-            "reply() when you only need the final result.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["00-setup.html"] = [
+    (
+        "第一个程序为什么写成 <code>async def main()</code> + <code>await agent.reply(...)</code> + <code>asyncio.run(main())</code>？",
+        "Why is the first program written as <code>async def main()</code> + <code>await agent.reply(...)</code> + <code>asyncio.run(main())</code>?",
+        [
+            ("因为 AgentScope 的 API 是异步的：<code>reply(...)</code> 返回协程，必须 <code>await</code> 并由事件循环驱动",
+             "Because AgentScope's API is async: <code>reply(...)</code> returns a coroutine that must be <code>await</code>ed and driven by an event loop", True),
+            ("异步只是为了让这一次调用返回得更快",
+             "Async is only there to make this single call return faster", False),
+            ("因为模型默认流式输出，不用 <code>asyncio</code> 就拿不到完整回复",
+             "Because the model streams by default, and without <code>asyncio</code> you can't get the full reply", False),
+        ],
+        "AgentScope 全程异步：<code>reply</code> 是协程、<code>reply_stream</code> 是异步生成器，都得 await / async for，所以入口用 <code>asyncio.run</code>。这与「更快」或「流式」无关——<code>reply</code> 本身就返回完整的 <code>AssistantMsg</code>。",
+        "AgentScope is async throughout: <code>reply</code> is a coroutine and <code>reply_stream</code> an async generator, both needing await / async for — hence <code>asyncio.run</code> at the entry. It is not about speed or streaming; <code>reply</code> already returns the complete <code>AssistantMsg</code>.",
+    ),
+]
+
+QUIZZES["01-what-is-agentscope.html"] = [
+    (
+        "AgentScope 说自己「为 agentic LLM 设计」，这主要意味着什么？",
+        "AgentScope says it is \u201cdesigned for agentic LLMs\u201d. What does that mainly mean?",
+        [
+            ("它会替你微调 / 训练出一个更 agentic 的模型",
+             "It fine-tunes / trains a more agentic model for you", False),
+            ("放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它",
+             "It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows", True),
+            ("用固定的提示词模板把模型锁死成一问一答",
+             "It locks the model into fixed prompt templates for one-shot Q&A", False),
+        ],
+        "框架既不训练模型，也不用死板编排去束缚它；模型越强，框架越省力。AgentScope 负责工具、事件、权限等「周边管道」。",
+        "The framework neither trains the model nor constrains it with rigid orchestration; the stronger the model, the less the framework fights it. AgentScope provides the surrounding plumbing — tools, events, permissions.",
+    ),
+]
+
+QUIZZES["02-architecture.html"] = [
+    (
+        "在一次回复中，哪个模块居中调度、把 <code>model</code> / <code>formatter</code> / <code>tool</code> / <code>event</code> 串起来？",
+        "During one reply, which module sits at the center and threads together <code>model</code> / <code>formatter</code> / <code>tool</code> / <code>event</code>?",
+        [
+            ("<code>app</code>（服务层）", "<code>app</code> (the service layer)", False),
+            ("<code>middleware</code>", "<code>middleware</code>", False),
+            ("<code>agent</code>", "<code>agent</code>", True),
+        ],
+        "<code>agent</code> 是中枢，按「推理→格式化→行动→播报」串起其余模块。<code>app</code> 只是把 agent 包装成多租户服务，<code>middleware</code> 只是围绕循环的钩子。",
+        "The <code>agent</code> is the hub, threading the others as reason\u2192format\u2192act\u2192broadcast. <code>app</code> merely wraps agents into a multi-tenant service, and <code>middleware</code> only hooks around the loop.",
+    ),
+]
+
+QUIZZES["03-lifecycle.html"] = [
+    (
+        "推理阶段模型请求调用一个工具，接下来会发生什么？",
+        "During reasoning the model requests a tool call. What happens next?",
+        [
+            ("Agent 执行该工具，把结果<strong>观察</strong>回上下文，再继续「推理→行动」循环，直到给出最终答案",
+             "The agent runs the tool, <strong>observes</strong> the result back into context, and continues the reason\u2192act loop until a final answer", True),
+            ("回复立即结束，工具调用本身就是最终结果",
+             "The reply ends immediately; the tool call itself is the final result", False),
+            ("Agent 跳过该工具，直接用模型的纯文本作答",
+             "The agent skips the tool and answers with the model's plain text", False),
+        ],
+        "一次回复是「推理→行动」的循环：工具结果会被观察回上下文，模型据此继续推理、可能再次调用工具，直到产出最终 <code>AssistantMsg</code> 才结束。",
+        "A reply is a reason\u2192act loop: tool results are observed back into context, the model reasons further (possibly calling more tools), and only the final <code>AssistantMsg</code> ends it.",
+    ),
+]

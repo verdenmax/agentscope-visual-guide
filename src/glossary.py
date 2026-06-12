@@ -456,41 +456,39 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "29-glossary.html": [
-        (
-            "下列哪一项<strong>不是</strong>类，而是返回 <code>Msg</code> 的工厂函数？",
-            "Which of these is <strong>not</strong> a class but a factory function "
-            "that returns a <code>Msg</code>?",
-            [
-                ("<code>UserMsg</code>", "<code>UserMsg</code>", True),
-                ("<code>Toolkit</code>", "<code>Toolkit</code>", False),
-                ("<code>ChatModelBase</code>", "<code>ChatModelBase</code>", False),
-            ],
-            "<code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> "
-            "都是工厂函数，按指定 role 构造一个 <code>Msg</code>；"
-            "<code>Toolkit</code> 与 <code>ChatModelBase</code> 则是类。",
-            "<code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> "
-            "are factory functions that build a <code>Msg</code> with a fixed role; "
-            "<code>Toolkit</code> and <code>ChatModelBase</code> are classes.",
-        ),
-        (
-            "<code>FormatterBase</code> 的职责是什么？",
-            "What is the responsibility of <code>FormatterBase</code>?",
-            [
-                ("把 <code>Msg</code> 列表转换成各厂商要求的请求格式",
-                 "Turn a <code>Msg</code> list into each vendor's request format",
-                 True),
-                ("管理 API key 与密钥", "Manage API keys and secrets", False),
-                ("在沙箱中执行工具", "Execute tools inside a sandbox", False),
-            ],
-            "<code>FormatterBase</code> 负责把统一的 <code>Msg</code> 列表适配成不同厂商的"
-            "具体请求格式；管理密钥的是 <code>CredentialBase</code>，沙箱执行属于 "
-            "<code>WorkspaceBase</code>。",
-            "<code>FormatterBase</code> adapts the unified <code>Msg</code> list into "
-            "each vendor's concrete request format; secrets are handled by "
-            "<code>CredentialBase</code> and sandboxed execution by "
-            "<code>WorkspaceBase</code>.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["29-glossary.html"] = [
+    (
+        "下列哪一项不是类，而是返回 <code>Msg</code> 的工厂函数？",
+        "Which of these is not a class, but a factory function that returns a <code>Msg</code>?",
+        [
+            ("<code>UserMsg</code>", "<code>UserMsg</code>", True),
+            ("<code>Msg</code>（消息核心类本身）",
+             "<code>Msg</code> (the core message class itself)", False),
+            ("<code>ContentBlock</code>", "<code>ContentBlock</code>", False),
+        ],
+        "<code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> 是工厂函数，"
+        "按固定 role 构造一个 <code>Msg</code>；<code>Msg</code> 是它们返回的核心类，而 "
+        "<code>ContentBlock</code> 既不是类也不是工厂，而是各内容块类型的联合（类型别名）。",
+        "<code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> are factory "
+        "functions that build a <code>Msg</code> with a fixed role; <code>Msg</code> is the core "
+        "class they return, while <code>ContentBlock</code> is neither a class nor a factory but "
+        "a type alias (the union of content-block types).",
+    ),
+    (
+        "<code>FormatterBase</code> 的职责是什么？",
+        "What is the responsibility of <code>FormatterBase</code>?",
+        [
+            ("把 <code>Msg</code> 列表转换成各厂商要求的请求格式",
+             "Turn a <code>Msg</code> list into each vendor's request format", True),
+            ("管理 API key 与密钥", "Manage API keys and secrets", False),
+            ("在沙箱中执行工具", "Execute tools inside a sandbox", False),
+        ],
+        "<code>FormatterBase</code> 负责把统一的 <code>Msg</code> 列表适配成不同厂商的具体请求"
+        "格式；管理密钥的是 <code>CredentialBase</code>，沙箱执行属于 <code>WorkspaceBase</code>。",
+        "<code>FormatterBase</code> adapts the unified <code>Msg</code> list into each vendor's "
+        "concrete request format; secrets are handled by <code>CredentialBase</code> and "
+        "sandboxed execution by <code>WorkspaceBase</code>.",
+    ),
+]

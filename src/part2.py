@@ -433,73 +433,87 @@ LESSONS = {
 }
 
 
-QUIZZES = {
-    "04-messages.html": [
-        (
-            "<code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> 是什么？",
-            "What are <code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code>?",
-            [
-                ("构造带固定 role 的 <code>Msg</code> 的工厂函数",
-                 "Factory functions that build a <code>Msg</code> with a fixed role", True),
-                ("<code>Msg</code> 的三个子类", "Three subclasses of <code>Msg</code>", False),
-                ("三种不同的模型", "Three different models", False),
-            ],
-            "它们是工厂函数，返回 role 固定的 Msg，而不是子类。",
-            "They are factory functions returning a Msg with a fixed role, not subclasses.",
-        ),
-    ],
-    "05-chat-models.html": [
-        (
-            "所有聊天模型的共同基类是什么？",
-            "What is the common base class of all chat models?",
-            [
-                ("<code>ChatModelBase</code>", "<code>ChatModelBase</code>", True),
-                ("<code>Agent</code>", "<code>Agent</code>", False),
-                ("<code>Toolkit</code>", "<code>Toolkit</code>", False),
-            ],
-            "每个厂商实现都继承 ChatModelBase，统一调用接口。",
-            "Every vendor implementation subclasses ChatModelBase for a unified interface.",
-        ),
-    ],
-    "06-credentials.html": [
-        (
-            "API key 应该怎么管理？",
-            "How should an API key be managed?",
-            [
-                ("从环境变量 / 密钥库读取，不要硬编码",
-                 "Read from an env var / secret store; never hardcode", True),
-                ("直接写进源码", "Write it directly into the source", False),
-                ("提交到 git", "Commit it to git", False),
-            ],
-            "凭证应从环境变量读取并与模型配置解耦，绝不硬编码。",
-            "Credentials should be read from env vars, decoupled from model config, never hardcoded.",
-        ),
-    ],
-    "07-tools.html": [
-        (
-            "<code>Toolkit</code> 如何让模型知道某个工具怎么调用？",
-            "How does <code>Toolkit</code> tell the model how to call a tool?",
-            [
-                ("自动从函数签名 / docstring 生成 JSON schema",
-                 "It auto-generates a JSON schema from the signature / docstring", True),
-                ("要求你手写 schema", "It requires you to hand-write the schema", False),
-                ("它不暴露任何信息", "It exposes nothing", False),
-            ],
-            "Toolkit 通过 get_tool_schemas() 自动生成并提供工具的 JSON schema。",
-            "Toolkit auto-generates and provides each tool's JSON schema via get_tool_schemas().",
-        ),
-    ],
-    "08-agents-intro.html": [
-        (
-            "<code>Agent</code> 运行的核心循环是什么？",
-            "What core loop does an <code>Agent</code> run?",
-            [
-                ("推理-行动（ReAct）循环", "A reasoning-acting (ReAct) loop", True),
-                ("一次性返回，无循环", "One-shot, no loop", False),
-                ("无限随机循环", "An infinite random loop", False),
-            ],
-            "Agent 在 ReAct 循环里「想—用工具—观察—再想」，直到给出答案。",
-            "The Agent thinks, uses tools, observes, and thinks again in a ReAct loop until it answers.",
-        ),
-    ],
-}
+QUIZZES: dict = {}
+
+QUIZZES["04-messages.html"] = [
+    (
+        "关于 <code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code>，哪一项正确？",
+        "Which statement about <code>UserMsg</code> / <code>AssistantMsg</code> / <code>SystemMsg</code> is correct?",
+        [
+            ("它们是 <code>Msg</code> 的三个子类，可用 <code>isinstance</code> 区分",
+             "They are three subclasses of <code>Msg</code>, distinguishable via <code>isinstance</code>", False),
+            ("它们是三种字段互不相同的独立消息类",
+             "They are three independent message classes with different fields", False),
+            ("它们是工厂函数，都返回同一个 <code>Msg</code> 类，只是 <code>role</code> 不同",
+             "They are factory functions that all return the same <code>Msg</code> class, differing only in <code>role</code>", True),
+        ],
+        "三者都是<strong>工厂函数</strong>，返回的都是同一个 <code>Msg</code>（仅 <code>role</code> 不同），不是子类——<code>isinstance(m, UserMsg)</code> 并不成立。",
+        "All three are <strong>factory functions</strong> returning the same <code>Msg</code> (only <code>role</code> differs), not subclasses — <code>isinstance(m, UserMsg)</code> would not work.",
+    ),
+]
+
+QUIZZES["05-chat-models.html"] = [
+    (
+        "直接调用一个 <code>ChatModelBase</code> 模型，返回的是什么？",
+        "When you call a <code>ChatModelBase</code> model directly, what comes back?",
+        [
+            ("一个纯文本字符串", "A plain text string", False),
+            ("一条最终的 <code>AssistantMsg</code>", "A final <code>AssistantMsg</code>", False),
+            ("一个 <code>ChatResponse</code>：内容块（文本/思考/工具调用）加 token 用量",
+             "A <code>ChatResponse</code>: content blocks (text / thinking / tool calls) plus token usage", True),
+        ],
+        "模型调用返回 <code>ChatResponse</code>（内容块 + <code>ChatUsage</code> 用量），不是字符串；把它整理成 <code>AssistantMsg</code> 是 <code>Agent</code> 的事。",
+        "A model call returns a <code>ChatResponse</code> (content blocks + <code>ChatUsage</code>), not a string; turning it into an <code>AssistantMsg</code> is the <code>Agent</code>'s job.",
+    ),
+]
+
+QUIZZES["06-credentials.html"] = [
+    (
+        "把<strong>凭证（Credential）</strong>从模型配置里分离出来，主要好处是什么？",
+        "What is the main benefit of separating the <strong>credential</strong> from the model config?",
+        [
+            ("这样就能把密钥安全地硬编码进凭证对象里",
+             "So the key can be safely hardcoded into the credential object", False),
+            ("密钥可独立保管与轮换，同一份模型配置能在多环境复用",
+             "Secrets can be held and rotated independently, and one model config reused across environments", True),
+            ("凭证会自动帮你选择最便宜的模型",
+             "The credential auto-selects the cheapest model for you", False),
+        ],
+        "解耦让密钥单独保管、便于轮换，并能在多环境复用同一模型配置——但密钥仍应从环境变量 / 密钥库读取，<strong>绝不</strong>硬编码（写进凭证对象也不行）。",
+        "Decoupling lets secrets be held separately, rotated, and reused across environments — but keys should still come from env vars / a secret store and be <strong>never</strong> hardcoded (not even into the credential object).",
+    ),
+]
+
+QUIZZES["07-tools.html"] = [
+    (
+        "用 <code>FunctionTool</code> 把一个 Python 函数变成工具时，模型看到的「工具说明」来自哪里？",
+        "When you wrap a Python function as a tool with <code>FunctionTool</code>, where does the model's \u201ctool spec\u201d come from?",
+        [
+            ("函数的<strong>签名 + 类型注解 + docstring</strong>，由 <code>Toolkit</code> 自动生成 JSON schema",
+             "The function's <strong>signature + type hints + docstring</strong>, auto-generated into a JSON schema by <code>Toolkit</code>", True),
+            ("你必须手写一份 JSON schema 再注册进去",
+             "You must hand-write a JSON schema and register it", False),
+            ("只取函数名，参数说明会被忽略",
+             "Just the function name; parameter docs are ignored", False),
+        ],
+        "<code>FunctionTool</code> 从签名 / 类型注解推断参数，从 docstring 提取描述，自动生成 schema——所以<strong>清晰的类型注解和 docstring 直接决定模型能否正确调用</strong>。",
+        "<code>FunctionTool</code> infers parameters from the signature / type hints and the description from the docstring to auto-build the schema — so <strong>clear type hints and docstrings directly determine whether the model calls the tool correctly</strong>.",
+    ),
+]
+
+QUIZZES["08-agents-intro.html"] = [
+    (
+        "<code>Agent</code> 的 ReAct（推理-行动）循环，比「把消息直接丢给模型问一次」多了什么？",
+        "What does an <code>Agent</code>'s ReAct (reason-act) loop add over \u201cjust asking the model once\u201d?",
+        [
+            ("它会把同一个问题问模型很多遍再取平均",
+             "It asks the model the same question many times and averages the answers", False),
+            ("它只是自动加上系统提示，仍然只调用模型一次",
+             "It just auto-adds the system prompt but still calls the model only once", False),
+            ("它能调用工具、把结果观察回上下文、再据此继续推理，必要时多轮迭代",
+             "It can call tools, observe results back into context, and keep reasoning over multiple rounds as needed", True),
+        ],
+        "ReAct 让 agent「想→用工具→观察结果→再想」，根据工具结果决定下一步并可多轮迭代，而不是把问题重复问或只问一次。",
+        "ReAct lets the agent think\u2192use a tool\u2192observe\u2192think again, deciding the next step from tool results across multiple rounds — not repeating the question or asking only once.",
+    ),
+]
