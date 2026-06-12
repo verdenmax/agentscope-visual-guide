@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
@@ -280,7 +287,7 @@ table.t tr:last-child td { border-bottom: none; }
                 ...        <span class="cm"># 模型要调用工具 / a tool call</span>
             <span class="kw">case</span> EventType.REPLY_END:
                 ...        <span class="cm"># 回复完成（不含最终消息）/ reply complete</span>
-    <span class="kw">return</span> <span class="st">&quot;&quot;</span>.join(answer)                            <span class="cm"># 最终文本 / the final text</span></pre><div class="code-cap" lang="zh">关键：用 evt.delta 取增量文本，并自行累积成最终答案。</div><div class="code-cap" lang="en">Key: read incremental text from evt.delta and accumulate the final answer.</div></figure><div class="card important"><div class="tag"><span lang="zh">⚠️ 重要</span><span lang="en">⚠️ Important</span></div><div lang="zh">事件对象不是字符串：增量文本在 <code>evt.delta</code> 里。直接 <code>print(evt)</code> 会打印一长串事件 repr，而不是「Hi Tony!」。</div><div lang="en">An event is not a string: the incremental text lives in <code>evt.delta</code>. <code>print(evt)</code> dumps a long event repr, not "Hi Tony!".</div></div><h2 lang="zh">流式 vs 一次性</h2><h2 lang="en">Streaming vs one-shot</h2><table class="t"><tr><th><span lang="zh">方法</span><span lang="en">Method</span></th><th><span lang="zh">返回</span><span lang="en">Returns</span></th><th><span lang="zh">何时用</span><span lang="en">When</span></th></tr><tr><td><span lang="zh"><code>agent.reply_stream(msg)</code></span><span lang="en"><code>agent.reply_stream(msg)</code></span></td><td><span lang="zh">async generator（逐事件）</span><span lang="en">async generator (per event)</span></td><td><span lang="zh">需要实时 UI / 人机交互</span><span lang="en">live UI / human-in-the-loop</span></td></tr><tr><td><span lang="zh"><code>agent.reply(msg)</code></span><span lang="en"><code>agent.reply(msg)</code></span></td><td><span lang="zh">最终的 <code>AssistantMsg</code></span><span lang="en">the final <code>AssistantMsg</code></span></td><td><span lang="zh">只关心结果</span><span lang="en">you only need the result</span></td></tr><tr><td><span lang="zh"><code>agent.observe(msgs)</code></span><span lang="en"><code>agent.observe(msgs)</code></span></td><td><span lang="zh">无（写入记忆）</span><span lang="en">nothing (records to memory)</span></td><td><span lang="zh">注入消息但不立即回复</span><span lang="en">inject messages without replying</span></td></tr></table><details class="accordion"><summary><span class="badge-num">1</span><span lang="zh">为什么块事件要成对？</span><span lang="en">Why are block events paired?</span> <span class="hint"><span lang="zh">点击展开</span><span lang="en">expand</span></span></summary><div class="acc-body"><p lang="zh"><code>START</code> 让 UI <strong>开一个新气泡 / 卡片</strong>，<code>DELTA</code> 不断<strong>往里追加</strong>，<code>END</code> 标记<strong>这一块结束</strong>。没有这种配对，前端就无法区分「同一句话的续写」和「新的一段」。</p><p lang="en"><code>START</code> tells the UI to <strong>open a new bubble/card</strong>, <code>DELTA</code> keeps <strong>appending</strong>, and <code>END</code> marks <strong>that block done</strong>. Without the pairing a UI can't tell "more of the same sentence" from "a new segment".</p></div></details><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>reply_stream</code>（async generator）、<code>reply</code>、<code>observe</code></span><span lang="en"><code>reply_stream</code> (async generator), <code>reply</code>, <code>observe</code></span></td></tr><tr><td><code>event/_event.py</code></td><td><span lang="zh">用于 <code>match</code> 的 <code>EventType</code> 成员</span><span lang="en">the <code>EventType</code> members you <code>match</code> on</span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>reply_stream</code> = async generator，用 <code>async for</code> + <code>match</code> 消费。</span><span lang="en"><code>reply_stream</code> is an async generator; consume with <code>async for</code> + <code>match</code>.</span></li><li><span lang="zh">只要结果用 <code>reply</code>；要实时/可控用 <code>reply_stream</code>。</span><span lang="en">Use <code>reply</code> for the result; <code>reply_stream</code> for live/controllable.</span></li><li><span lang="zh">块事件成对出现，天然映射到 UI 的「开始-追加-结束」。</span><span lang="en">Paired block events map naturally to a UI's open-append-close.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">流式输出时，想把模型的文字实时打印出来，应该读取什么？</span><span lang="en">While streaming, to print the model's text live, what should you read?</span></div><ol class="quiz-opts"><li><span lang="zh">直接 <code>print(evt)</code>，事件本身就是那段文字</span><span lang="en">Just <code>print(evt)</code> — the event itself is the text</span></li><li><span lang="zh">在 <code>TEXT_BLOCK_DELTA</code> 事件上读取 <code>evt.delta</code>（增量文本）并自行累积</span><span lang="en">Read <code>evt.delta</code> (the incremental text) on <code>TEXT_BLOCK_DELTA</code> events and accumulate it yourself</span></li><li><span lang="zh">等 <code>REPLY_END</code>，从它里面取完整文本</span><span lang="en">Wait for <code>REPLY_END</code> and read the full text from it</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh">在 <code>TEXT_BLOCK_DELTA</code> 事件上读取 <code>evt.delta</code>（增量文本）并自行累积</span><span lang="en">Read <code>evt.delta</code> (the incremental text) on <code>TEXT_BLOCK_DELTA</code> events and accumulate it yourself</span></div><div lang="zh">增量文本在 <code>evt.delta</code> 里，<code>print(evt)</code> 只会打印事件的 repr。把每个 <code>DELTA</code> 的 <code>delta</code> 拼起来就是最终文本；<code>REPLY_END</code> 不含文本。</div><div lang="en">The incremental text lives in <code>evt.delta</code>; <code>print(evt)</code> only dumps the event's repr. Concatenate each <code>DELTA</code>'s <code>delta</code> for the final text; <code>REPLY_END</code> carries none.</div></details></div></section>
+    <span class="kw">return</span> <span class="st">&quot;&quot;</span>.join(answer)                            <span class="cm"># 最终文本 / the final text</span></pre><div class="code-cap" lang="zh">关键：用 evt.delta 取增量文本，并自行累积成最终答案。</div><div class="code-cap" lang="en">Key: read incremental text from evt.delta and accumulate the final answer.</div></figure><div class="card important"><div class="tag"><span lang="zh">⚠️ 重要</span><span lang="en">⚠️ Important</span></div><div lang="zh">事件对象不是字符串：增量文本在 <code>evt.delta</code> 里。直接 <code>print(evt)</code> 会打印一长串事件 repr，而不是「Hi Tony!」。</div><div lang="en">An event is not a string: the incremental text lives in <code>evt.delta</code>. <code>print(evt)</code> dumps a long event repr, not "Hi Tony!".</div></div><h2 lang="zh">流式 vs 一次性</h2><h2 lang="en">Streaming vs one-shot</h2><table class="t"><tr><th><span lang="zh">方法</span><span lang="en">Method</span></th><th><span lang="zh">返回</span><span lang="en">Returns</span></th><th><span lang="zh">何时用</span><span lang="en">When</span></th></tr><tr><td><span lang="zh"><code>agent.reply_stream(msg)</code></span><span lang="en"><code>agent.reply_stream(msg)</code></span></td><td><span lang="zh">async generator（逐事件）</span><span lang="en">async generator (per event)</span></td><td><span lang="zh">需要实时 UI / 人机交互</span><span lang="en">live UI / human-in-the-loop</span></td></tr><tr><td><span lang="zh"><code>agent.reply(msg)</code></span><span lang="en"><code>agent.reply(msg)</code></span></td><td><span lang="zh">最终的 <code>AssistantMsg</code></span><span lang="en">the final <code>AssistantMsg</code></span></td><td><span lang="zh">只关心结果</span><span lang="en">you only need the result</span></td></tr><tr><td><span lang="zh"><code>agent.observe(msgs)</code></span><span lang="en"><code>agent.observe(msgs)</code></span></td><td><span lang="zh">无（写入记忆）</span><span lang="en">nothing (records to memory)</span></td><td><span lang="zh">注入消息但不立即回复</span><span lang="en">inject messages without replying</span></td></tr></table><details class="accordion"><summary><span class="badge-num">1</span><span lang="zh">为什么块事件要成对？</span><span lang="en">Why are block events paired?</span> <span class="hint"><span lang="zh">点击展开</span><span lang="en">expand</span></span></summary><div class="acc-body"><p lang="zh"><code>START</code> 让 UI <strong>开一个新气泡 / 卡片</strong>，<code>DELTA</code> 不断<strong>往里追加</strong>，<code>END</code> 标记<strong>这一块结束</strong>。没有这种配对，前端就无法区分「同一句话的续写」和「新的一段」。</p><p lang="en"><code>START</code> tells the UI to <strong>open a new bubble/card</strong>, <code>DELTA</code> keeps <strong>appending</strong>, and <code>END</code> marks <strong>that block done</strong>. Without the pairing a UI can't tell "more of the same sentence" from "a new segment".</p></div></details><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>reply_stream</code>（async generator）、<code>reply</code>、<code>observe</code></span><span lang="en"><code>reply_stream</code> (async generator), <code>reply</code>, <code>observe</code></span></td></tr><tr><td><code>event/_event.py</code></td><td><span lang="zh">用于 <code>match</code> 的 <code>EventType</code> 成员</span><span lang="en">the <code>EventType</code> members you <code>match</code> on</span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>reply_stream</code> = async generator，用 <code>async for</code> + <code>match</code> 消费。</span><span lang="en"><code>reply_stream</code> is an async generator; consume with <code>async for</code> + <code>match</code>.</span></li><li><span lang="zh">只要结果用 <code>reply</code>；要实时/可控用 <code>reply_stream</code>。</span><span lang="en">Use <code>reply</code> for the result; <code>reply_stream</code> for live/controllable.</span></li><li><span lang="zh">块事件成对出现，天然映射到 UI 的「开始-追加-结束」。</span><span lang="en">Paired block events map naturally to a UI's open-append-close.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">流式输出时，想把模型的文字实时打印出来，应该读取什么？</span><span lang="en">While streaming, to print the model's text live, what should you read?</span></div><ol class="quiz-opts"><li><span lang="zh">直接 <code>print(evt)</code>，事件本身就是那段文字</span><span lang="en">Just <code>print(evt)</code> — the event itself is the text</span></li><li><span lang="zh">在 <code>TEXT_BLOCK_DELTA</code> 事件上读取 <code>evt.delta</code>（增量文本）并自行累积</span><span lang="en">Read <code>evt.delta</code> (the incremental text) on <code>TEXT_BLOCK_DELTA</code> events and accumulate it yourself</span></li><li><span lang="zh">等 <code>REPLY_END</code>，从它里面取完整文本</span><span lang="en">Wait for <code>REPLY_END</code> and read the full text from it</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer &amp; explanation</span></summary><div class="quiz-correct"><span lang="zh">在 <code>TEXT_BLOCK_DELTA</code> 事件上读取 <code>evt.delta</code>（增量文本）并自行累积</span><span lang="en">Read <code>evt.delta</code> (the incremental text) on <code>TEXT_BLOCK_DELTA</code> events and accumulate it yourself</span></div><div lang="zh">增量文本在 <code>evt.delta</code> 里，<code>print(evt)</code> 只会打印事件的 repr。把每个 <code>DELTA</code> 的 <code>delta</code> 拼起来就是最终文本；<code>REPLY_END</code> 不含文本。</div><div lang="en">The incremental text lives in <code>evt.delta</code>; <code>print(evt)</code> only dumps the event's repr. Concatenate each <code>DELTA</code>'s <code>delta</code> for the final text; <code>REPLY_END</code> carries none.</div></details></div></section>
 <nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="09-event-system.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">事件系统</span><span lang="en">Event System</span></span></a><a class="nav-link next" rel="next" href="11-formatter.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">Formatter 多厂商适配</span><span lang="en">Formatter</span></span></a></nav>
 <footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
 </div>

@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
@@ -286,7 +293,7 @@ agent = Agent(
     reply = <span class="kw">await</span> agent.reply(UserMsg(<span class="st">&quot;Tony&quot;</span>, <span class="st">&quot;List files here.&quot;</span>))
     print(reply)
 
-asyncio.run(main())</pre><div class="code-cap" lang="zh">模型 + 工具 = 能动手的 agent。</div><div class="code-cap" lang="en">Model + tools = an agent that can act.</div></figure><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>Agent</code> 类与 <code>reply</code> / <code>reply_stream</code></span><span lang="en">the <code>Agent</code> class and <code>reply</code> / <code>reply_stream</code></span></td></tr><tr><td><code>model/_dashscope/_model.py</code></td><td><span lang="zh"><code>DashScopeChatModel</code> 等厂商模型实现</span><span lang="en">vendor model implementations such as <code>DashScopeChatModel</code></span></td></tr><tr><td><code>tool/_toolkit.py</code></td><td><span lang="zh"><code>Toolkit</code> 工具注册与 schema 生成</span><span lang="en"><code>Toolkit</code> tool registration and schema generation</span></td></tr><tr><td><code>event/_event.py</code></td><td><span lang="zh"><code>EventType</code> 与全部事件类型</span><span lang="en"><code>EventType</code> and all event variants</span></td></tr></table></div><div class="card tip"><div class="tag"><span lang="zh">💡 设计亮点</span><span lang="en">💡 Design highlight</span></div><div lang="zh">设计哲学：<strong>不用死板的提示词和编排去约束模型</strong>，而是放大它本身的推理与工具使用能力。模型越强，框架越省力——这正是「为 agentic LLM 设计」的含义。</div><div lang="en">Design philosophy: rather than constraining the model with rigid prompts and orchestration, <strong>amplify its own reasoning and tool use</strong>. The stronger the model, the less the framework fights it — that is what "designed for agentic LLMs" means.</div></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh">AgentScope 负责模型<strong>周边的管道</strong>，而不是训练模型本身。</span><span lang="en">AgentScope handles the <strong>plumbing around</strong> the model, not training the model itself.</span></li><li><span lang="zh">核心心智模型：<strong>Agent = 模型 + 工具 + 系统提示</strong>，运行「推理-行动」循环。</span><span lang="en">Core mental model: <strong>Agent = model + tools + system prompt</strong>, running a reasoning-acting loop.</span></li><li><span lang="zh">一切交互通过<strong>事件流</strong>暴露，天然支持 UI 与人类介入（human-in-the-loop）。</span><span lang="en">All interaction is exposed via an <strong>event stream</strong>, naturally supporting UIs and human-in-the-loop.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">AgentScope 说自己「为 agentic LLM 设计」，这主要意味着什么？</span><span lang="en">AgentScope says it is “designed for agentic LLMs”. What does that mainly mean?</span></div><ol class="quiz-opts"><li><span lang="zh">它会替你微调 / 训练出一个更 agentic 的模型</span><span lang="en">It fine-tunes / trains a more agentic model for you</span></li><li><span lang="zh">放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它</span><span lang="en">It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows</span></li><li><span lang="zh">用固定的提示词模板把模型锁死成一问一答</span><span lang="en">It locks the model into fixed prompt templates for one-shot Q&A</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh">放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它</span><span lang="en">It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows</span></div><div lang="zh">框架既不训练模型，也不用死板编排去束缚它；模型越强，框架越省力。AgentScope 负责工具、事件、权限等「周边管道」。</div><div lang="en">The framework neither trains the model nor constrains it with rigid orchestration; the stronger the model, the less the framework fights it. AgentScope provides the surrounding plumbing — tools, events, permissions.</div></details></div></section>
+asyncio.run(main())</pre><div class="code-cap" lang="zh">模型 + 工具 = 能动手的 agent。</div><div class="code-cap" lang="en">Model + tools = an agent that can act.</div></figure><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>Agent</code> 类与 <code>reply</code> / <code>reply_stream</code></span><span lang="en">the <code>Agent</code> class and <code>reply</code> / <code>reply_stream</code></span></td></tr><tr><td><code>model/_dashscope/_model.py</code></td><td><span lang="zh"><code>DashScopeChatModel</code> 等厂商模型实现</span><span lang="en">vendor model implementations such as <code>DashScopeChatModel</code></span></td></tr><tr><td><code>tool/_toolkit.py</code></td><td><span lang="zh"><code>Toolkit</code> 工具注册与 schema 生成</span><span lang="en"><code>Toolkit</code> tool registration and schema generation</span></td></tr><tr><td><code>event/_event.py</code></td><td><span lang="zh"><code>EventType</code> 与全部事件类型</span><span lang="en"><code>EventType</code> and all event variants</span></td></tr></table></div><div class="card tip"><div class="tag"><span lang="zh">💡 设计亮点</span><span lang="en">💡 Design highlight</span></div><div lang="zh">设计哲学：<strong>不用死板的提示词和编排去约束模型</strong>，而是放大它本身的推理与工具使用能力。模型越强，框架越省力——这正是「为 agentic LLM 设计」的含义。</div><div lang="en">Design philosophy: rather than constraining the model with rigid prompts and orchestration, <strong>amplify its own reasoning and tool use</strong>. The stronger the model, the less the framework fights it — that is what "designed for agentic LLMs" means.</div></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh">AgentScope 负责模型<strong>周边的管道</strong>，而不是训练模型本身。</span><span lang="en">AgentScope handles the <strong>plumbing around</strong> the model, not training the model itself.</span></li><li><span lang="zh">核心心智模型：<strong>Agent = 模型 + 工具 + 系统提示</strong>，运行「推理-行动」循环。</span><span lang="en">Core mental model: <strong>Agent = model + tools + system prompt</strong>, running a reasoning-acting loop.</span></li><li><span lang="zh">一切交互通过<strong>事件流</strong>暴露，天然支持 UI 与人类介入（human-in-the-loop）。</span><span lang="en">All interaction is exposed via an <strong>event stream</strong>, naturally supporting UIs and human-in-the-loop.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">AgentScope 说自己「为 agentic LLM 设计」，这主要意味着什么？</span><span lang="en">AgentScope says it is “designed for agentic LLMs”. What does that mainly mean?</span></div><ol class="quiz-opts"><li><span lang="zh">它会替你微调 / 训练出一个更 agentic 的模型</span><span lang="en">It fine-tunes / trains a more agentic model for you</span></li><li><span lang="zh">放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它</span><span lang="en">It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows</span></li><li><span lang="zh">用固定的提示词模板把模型锁死成一问一答</span><span lang="en">It locks the model into fixed prompt templates for one-shot Q&amp;A</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer &amp; explanation</span></summary><div class="quiz-correct"><span lang="zh">放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它</span><span lang="en">It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows</span></div><div lang="zh">框架既不训练模型，也不用死板编排去束缚它；模型越强，框架越省力。AgentScope 负责工具、事件、权限等「周边管道」。</div><div lang="en">The framework neither trains the model nor constrains it with rigid orchestration; the stronger the model, the less the framework fights it. AgentScope provides the surrounding plumbing — tools, events, permissions.</div></details></div></section>
 <nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="00-setup.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">环境配置与第一次运行</span><span lang="en">Setup &amp; First Run</span></span></a><a class="nav-link next" rel="next" href="02-architecture.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">整体架构全景</span><span lang="en">Architecture panorama</span></span></a></nav>
 <footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
 </div>

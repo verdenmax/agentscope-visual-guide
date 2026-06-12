@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
@@ -282,7 +289,7 @@ agentscope_app = create_app(
     message_bus=RedisMessageBus(),
     workspace_manager=LocalWorkspaceManager(),
 )
-root.mount(<span class="st">&quot;/agentscope&quot;</span>, agentscope_app)</pre><div class="code-cap" lang="zh">作为子应用挂载，与你现有服务共存。</div><div class="code-cap" lang="en">Mount as a sub-app alongside your existing service.</div></figure></div></details><p lang="zh">可选参数支持注入：额外凭证类型、FastAPI 中间件、每个 agent 的中间件与工具、自定义 agent 类，以及<strong>子代理模板</strong>（<code>SubAgentTemplate</code>，供 Agent Team 使用，见第 25 课）。</p><p lang="en">Optional parameters let you inject: extra credential types, FastAPI middlewares, per-agent middlewares and tools, a custom agent class, and <strong>sub-agent templates</strong> (<code>SubAgentTemplate</code>, used by Agent Team — lesson 25).</p><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>app/_app.py</code></td><td><span lang="zh"><code>create_app(storage, message_bus, workspace_manager, ...)</code></span><span lang="en"><code>create_app(storage, message_bus, workspace_manager, ...)</code></span></td></tr><tr><td><code>app/__init__.py</code></td><td><span lang="zh">导出 <code>create_app</code> 与 <code>SubAgentTemplate</code></span><span lang="en">exports <code>create_app</code> and <code>SubAgentTemplate</code></span></td></tr><tr><td><code>app/_service/_session.py</code></td><td><span lang="zh">会话级服务逻辑（多会话隔离）</span><span lang="en">session-level service logic (multi-session isolation)</span></td></tr><tr><td><code>examples/agent_service</code></td><td><span lang="zh">可运行的服务示例（<code>main.py</code>）</span><span lang="en">a runnable service example (<code>main.py</code>)</span></td></tr></table></div><div class="card important"><div class="tag"><span lang="zh">⚠️ 重要</span><span lang="en">⚠️ Important</span></div><div lang="zh">运行前置条件：服务自带的 <strong>storage 与 message_bus 实现是 Redis-only</strong>（只有 workspace 有本地实现）。需要先跑起 Redis（如 <code>docker run -p 6379:6379 redis:7</code>），安装 <code>agentscope[full]</code>，后端从 <code>agentscope.app.storage</code> / <code>.message_bus</code> / <code>.workspace_manager</code> 导入；Web UI（<code>examples/web_ui</code>）需 Node ≥ 20。</div><div lang="en">Runtime prerequisites: the shipped <strong>storage and message_bus implementations are Redis-only</strong> (only the workspace has a local backend). Run Redis first (e.g. <code>docker run -p 6379:6379 redis:7</code>), install <code>agentscope[full]</code>, and import the backends from <code>agentscope.app.storage</code> / <code>.message_bus</code> / <code>.workspace_manager</code>; the Web UI (<code>examples/web_ui</code>) needs Node ≥ 20.</div></div><div class="card tip"><div class="tag"><span lang="zh">💡 设计亮点</span><span lang="en">💡 Design highlight</span></div><div lang="zh">三大后端都是<strong>统一接口</strong>：工作区已有本地/Docker/E2B 多种实现，存储与消息总线目前只有 Redis 实现——接口留出了扩展空间，未来可接入更多后端。</div><div lang="en">All three backends sit behind <strong>uniform interfaces</strong>: the workspace already has local/Docker/E2B implementations, while storage and the message bus ship only Redis today — the interfaces leave room to plug in more backends later.</div></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>create_app</code> 返回标准 FastAPI 应用，可独立运行或挂载。</span><span lang="en"><code>create_app</code> returns a standard FastAPI app you can run standalone or mount.</span></li><li><span lang="zh">三大后端：<strong>storage · message_bus · workspace_manager</strong>。</span><span lang="en">Three backends: <strong>storage · message_bus · workspace_manager</strong>.</span></li><li><span lang="zh">多租户 + 多会话隔离是内置能力。</span><span lang="en">Multi-tenancy + multi-session isolation are built in.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">关于 <code>create_app</code> 三大后端自带的实现，下列哪项正确？</span><span lang="en">Which statement about the backend implementations shipped with <code>create_app</code> is correct?</span></div><ol class="quiz-opts"><li><span lang="zh"><code>storage</code> 与 <code>message_bus</code> 目前只有 Redis 实现，只有 <code>workspace_manager</code> 有本地后端</span><span lang="en"><code>storage</code> and <code>message_bus</code> ship Redis-only today; only <code>workspace_manager</code> has a local backend</span></li><li><span lang="zh">三大后端都有本地实现，不依赖 Redis 也能直接跑起来</span><span lang="en">All three backends have local implementations, so you can run without Redis</span></li><li><span lang="zh"><code>storage</code> 有本地实现，但 <code>message_bus</code> 与 <code>workspace_manager</code> 必须用 Redis</span><span lang="en"><code>storage</code> has a local backend, but <code>message_bus</code> and <code>workspace_manager</code> must use Redis</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh"><code>storage</code> 与 <code>message_bus</code> 目前只有 Redis 实现，只有 <code>workspace_manager</code> 有本地后端</span><span lang="en"><code>storage</code> and <code>message_bus</code> ship Redis-only today; only <code>workspace_manager</code> has a local backend</span></div><div lang="zh">三大后端（storage / message_bus / workspace_manager）都是统一接口，但 storage 与 message_bus 目前只发布了 Redis 实现，运行前需先启动 Redis；只有 workspace 有本地 / Docker / E2B 等实现。</div><div lang="en">The three backends (storage / message_bus / workspace_manager) sit behind uniform interfaces, but storage and the message bus ship Redis-only today, so you must start Redis first; only the workspace has local / Docker / E2B implementations.</div></details></div></section>
+root.mount(<span class="st">&quot;/agentscope&quot;</span>, agentscope_app)</pre><div class="code-cap" lang="zh">作为子应用挂载，与你现有服务共存。</div><div class="code-cap" lang="en">Mount as a sub-app alongside your existing service.</div></figure></div></details><p lang="zh">可选参数支持注入：额外凭证类型、FastAPI 中间件、每个 agent 的中间件与工具、自定义 agent 类，以及<strong>子代理模板</strong>（<code>SubAgentTemplate</code>，供 Agent Team 使用，见第 25 课）。</p><p lang="en">Optional parameters let you inject: extra credential types, FastAPI middlewares, per-agent middlewares and tools, a custom agent class, and <strong>sub-agent templates</strong> (<code>SubAgentTemplate</code>, used by Agent Team — lesson 25).</p><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>app/_app.py</code></td><td><span lang="zh"><code>create_app(storage, message_bus, workspace_manager, ...)</code></span><span lang="en"><code>create_app(storage, message_bus, workspace_manager, ...)</code></span></td></tr><tr><td><code>app/__init__.py</code></td><td><span lang="zh">导出 <code>create_app</code> 与 <code>SubAgentTemplate</code></span><span lang="en">exports <code>create_app</code> and <code>SubAgentTemplate</code></span></td></tr><tr><td><code>app/_service/_session.py</code></td><td><span lang="zh">会话级服务逻辑（多会话隔离）</span><span lang="en">session-level service logic (multi-session isolation)</span></td></tr><tr><td><code>examples/agent_service</code></td><td><span lang="zh">可运行的服务示例（<code>main.py</code>）</span><span lang="en">a runnable service example (<code>main.py</code>)</span></td></tr></table></div><div class="card important"><div class="tag"><span lang="zh">⚠️ 重要</span><span lang="en">⚠️ Important</span></div><div lang="zh">运行前置条件：服务自带的 <strong>storage 与 message_bus 实现是 Redis-only</strong>（只有 workspace 有本地实现）。需要先跑起 Redis（如 <code>docker run -p 6379:6379 redis:7</code>），安装 <code>agentscope[full]</code>，后端从 <code>agentscope.app.storage</code> / <code>.message_bus</code> / <code>.workspace_manager</code> 导入；Web UI（<code>examples/web_ui</code>）需 Node ≥ 20。</div><div lang="en">Runtime prerequisites: the shipped <strong>storage and message_bus implementations are Redis-only</strong> (only the workspace has a local backend). Run Redis first (e.g. <code>docker run -p 6379:6379 redis:7</code>), install <code>agentscope[full]</code>, and import the backends from <code>agentscope.app.storage</code> / <code>.message_bus</code> / <code>.workspace_manager</code>; the Web UI (<code>examples/web_ui</code>) needs Node ≥ 20.</div></div><div class="card tip"><div class="tag"><span lang="zh">💡 设计亮点</span><span lang="en">💡 Design highlight</span></div><div lang="zh">三大后端都是<strong>统一接口</strong>：工作区已有本地/Docker/E2B 多种实现，存储与消息总线目前只有 Redis 实现——接口留出了扩展空间，未来可接入更多后端。</div><div lang="en">All three backends sit behind <strong>uniform interfaces</strong>: the workspace already has local/Docker/E2B implementations, while storage and the message bus ship only Redis today — the interfaces leave room to plug in more backends later.</div></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>create_app</code> 返回标准 FastAPI 应用，可独立运行或挂载。</span><span lang="en"><code>create_app</code> returns a standard FastAPI app you can run standalone or mount.</span></li><li><span lang="zh">三大后端：<strong>storage · message_bus · workspace_manager</strong>。</span><span lang="en">Three backends: <strong>storage · message_bus · workspace_manager</strong>.</span></li><li><span lang="zh">多租户 + 多会话隔离是内置能力。</span><span lang="en">Multi-tenancy + multi-session isolation are built in.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">关于 <code>create_app</code> 三大后端自带的实现，下列哪项正确？</span><span lang="en">Which statement about the backend implementations shipped with <code>create_app</code> is correct?</span></div><ol class="quiz-opts"><li><span lang="zh"><code>storage</code> 与 <code>message_bus</code> 目前只有 Redis 实现，只有 <code>workspace_manager</code> 有本地后端</span><span lang="en"><code>storage</code> and <code>message_bus</code> ship Redis-only today; only <code>workspace_manager</code> has a local backend</span></li><li><span lang="zh">三大后端都有本地实现，不依赖 Redis 也能直接跑起来</span><span lang="en">All three backends have local implementations, so you can run without Redis</span></li><li><span lang="zh"><code>storage</code> 有本地实现，但 <code>message_bus</code> 与 <code>workspace_manager</code> 必须用 Redis</span><span lang="en"><code>storage</code> has a local backend, but <code>message_bus</code> and <code>workspace_manager</code> must use Redis</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer &amp; explanation</span></summary><div class="quiz-correct"><span lang="zh"><code>storage</code> 与 <code>message_bus</code> 目前只有 Redis 实现，只有 <code>workspace_manager</code> 有本地后端</span><span lang="en"><code>storage</code> and <code>message_bus</code> ship Redis-only today; only <code>workspace_manager</code> has a local backend</span></div><div lang="zh">三大后端（storage / message_bus / workspace_manager）都是统一接口，但 storage 与 message_bus 目前只发布了 Redis 实现，运行前需先启动 Redis；只有 workspace 有本地 / Docker / E2B 等实现。</div><div lang="en">The three backends (storage / message_bus / workspace_manager) sit behind uniform interfaces, but storage and the message bus ship Redis-only today, so you must start Redis first; only the workspace has local / Docker / E2B implementations.</div></details></div></section>
 <nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="22-tts.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">TTS 语音</span><span lang="en">TTS</span></span></a><a class="nav-link next" rel="next" href="24-message-bus.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">消息总线</span><span lang="en">Message Bus</span></span></a></nav>
 <footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
 </div>

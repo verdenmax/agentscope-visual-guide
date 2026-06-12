@@ -32,7 +32,7 @@ def render(fname: str) -> str:
     if not qs:
         return ""
     title = t("🧠 小测验", "🧠 Quiz")
-    ans_label = t("答案与解析", "Answer & explanation")
+    ans_label = t("答案与解析", "Answer &amp; explanation")
     out = []
     for q_zh, q_en, options, exp_zh, exp_en in qs:
         opts = "".join(f"<li>{t(oz, oe)}</li>" for oz, oe, _ in options)

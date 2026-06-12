@@ -22,7 +22,7 @@ LESSON_00 = blocks(
     ),
     flow(
         [("安装 AgentScope", "Install"), ("配置 API 密钥", "Set API key"),
-         ("写第一个 agent", "Write an agent"), ("运行并看事件流", "Run & watch events")],
+         ("写第一个 agent", "Write an agent"), ("运行并看事件流", "Run &amp; watch events")],
         "走通这四步，后面每一课的示例代码都能直接跑起来。",
         "Clear these four steps and every later lesson's sample code runs as-is.",
     ),
@@ -323,18 +323,18 @@ LESSON_02 = blocks(
         "this order:",
     ),
     steps([
-        ("推理 Reason", "推理 Reason",
+        ("推理 Reason", "Reason",
          "用 <code>credential</code> 配好的 <code>model</code> 思考下一步。",
          "think with a <code>model</code> configured via <code>credential</code>."),
-        ("格式化 Format", "格式化 Format",
+        ("格式化 Format", "Format",
          "把对话历史交给 <code>formatter</code> 转成厂商请求格式。",
          "hand the dialogue history to a <code>formatter</code> for the vendor's format."),
-        ("行动 Act", "行动 Act",
+        ("行动 Act", "Act",
          "需要时调用 <code>tool</code>——受 <code>permission</code> 把关，可在 "
          "<code>workspace</code> 中执行。",
          "call <code>tool</code>s when needed — gated by <code>permission</code>, run in a "
          "<code>workspace</code>."),
-        ("播报 Broadcast", "播报 Broadcast",
+        ("播报 Broadcast", "Broadcast",
          "整个过程由 <code>event</code> 流向外播报，并可被 <code>middleware</code> 拦截增强。",
          "broadcast the whole process over the <code>event</code> stream, interceptable by "
          "<code>middleware</code>."),
@@ -397,17 +397,17 @@ LESSON_03 = blocks(
          "You build a <code>UserMsg(name, content)</code> and iterate "
          "<code>agent.reply_stream(msg)</code> with <code>async for</code>; the reply begins."),
         ("推理 Reason",
-         "推理 Reason",
+         "Reason",
          "Agent 调用模型，流式产出<strong>文本 / 思考</strong>，或决定<strong>调用工具</strong>。",
          "The agent calls the model, streaming <strong>text / thinking</strong> or deciding to "
          "<strong>call tools</strong>."),
-        ("行动 Act", "行动 Act",
+        ("行动 Act", "Act",
          "若模型请求了工具，Agent 执行它们并把结果<strong>观察</strong>回上下文；"
          "受管控的工具会先<strong>暂停等待权限确认</strong>（第 16 课）。",
          "If the model requested tools, the agent runs them and <strong>observes</strong> the "
          "results back into context; gated tools first <strong>pause for permission</strong> "
          "(lesson 16)."),
-        ("循环与收尾", "Loop & finish",
+        ("循环与收尾", "Loop &amp; finish",
          "推理 → 行动循环往复，直到模型给出最终答案，回复结束。"
          "（事件的细节与命名见<a href=\"09-event-system.html\">第 9 课</a>。）",
          "Reason → act repeats until the model gives a final answer and the reply ends. "
@@ -498,7 +498,7 @@ QUIZZES["01-what-is-agentscope.html"] = [
             ("放大模型自身的推理与工具使用能力，而不是用死板的提示词 / 流程去约束它",
              "It amplifies the model's own reasoning and tool use, rather than constraining it with rigid prompts / flows", True),
             ("用固定的提示词模板把模型锁死成一问一答",
-             "It locks the model into fixed prompt templates for one-shot Q&A", False),
+             "It locks the model into fixed prompt templates for one-shot Q&amp;A", False),
         ],
         "框架既不训练模型，也不用死板编排去束缚它；模型越强，框架越省力。AgentScope 负责工具、事件、权限等「周边管道」。",
         "The framework neither trains the model nor constrains it with rigid orchestration; the stronger the model, the less the framework fights it. AgentScope provides the surrounding plumbing — tools, events, permissions.",

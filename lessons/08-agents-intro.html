@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
@@ -286,7 +293,7 @@ agent = Agent(
     msg = <span class="kw">await</span> agent.reply(UserMsg(<span class="st">&quot;Tony&quot;</span>, <span class="st">&quot;List files here.&quot;</span>))
     print(msg)
 
-asyncio.run(main())</pre><div class="code-cap" lang="zh">最小可用 agent；reply 返回最终 AssistantMsg。</div><div class="code-cap" lang="en">A minimal working agent; reply returns the final AssistantMsg.</div></figure><h2 lang="zh">构造参数</h2><h2 lang="en">Constructor parameters</h2><table class="t"><tr><th><span lang="zh">参数</span><span lang="en">Parameter</span></th><th><span lang="zh">含义</span><span lang="en">Meaning</span></th></tr><tr><td><span lang="zh"><code>name</code></span><span lang="en"><code>name</code></span></td><td><span lang="zh">agent 标识</span><span lang="en">the agent identifier</span></td></tr><tr><td><span lang="zh"><code>system_prompt</code></span><span lang="en"><code>system_prompt</code></span></td><td><span lang="zh">系统提示（人设/指令）</span><span lang="en">the system prompt (persona/instructions)</span></td></tr><tr><td><span lang="zh"><code>model</code></span><span lang="en"><code>model</code></span></td><td><span lang="zh"><code>ChatModelBase</code> 实例</span><span lang="en">a <code>ChatModelBase</code> instance</span></td></tr><tr><td><span lang="zh"><code>toolkit</code></span><span lang="en"><code>toolkit</code></span></td><td><span lang="zh">可选的工具箱</span><span lang="en">an optional toolkit</span></td></tr><tr><td><span lang="zh"><code>middlewares</code></span><span lang="en"><code>middlewares</code></span></td><td><span lang="zh">可选的中间件列表（第 15 课）</span><span lang="en">an optional middleware list (lesson 15)</span></td></tr><tr><td><span lang="zh"><code>state</code> / <code>offloader</code></span><span lang="en"><code>state</code> / <code>offloader</code></span></td><td><span lang="zh">可选的状态与上下文卸载（第 19 / 17 课）</span><span lang="en">optional state and context offloading (lessons 19 / 17)</span></td></tr><tr><td><span lang="zh"><code>*_config</code></span><span lang="en"><code>*_config</code></span></td><td><span lang="zh"><code>ModelConfig</code> / <code>ContextConfig</code> / <code>ReActConfig</code></span><span lang="en"><code>ModelConfig</code> / <code>ContextConfig</code> / <code>ReActConfig</code></span></td></tr></table><div class="card note"><div class="tag"><span lang="zh">📌 注意</span><span lang="en">📌 Note</span></div><div lang="zh">用 <code>reply</code> 拿最终结果；用 <code>reply_stream</code> 拿事件流（第 10 课）；用 <code>observe</code> 注入消息而不立即回复。</div><div lang="en">Use <code>reply</code> for the final result; <code>reply_stream</code> for the event stream (lesson 10); <code>observe</code> to inject messages without replying.</div></div><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>Agent</code> 构造器与 <code>reply</code> / <code>reply_stream</code> / <code>observe</code> / <code>compress_context</code></span><span lang="en">the <code>Agent</code> constructor and <code>reply</code> / <code>reply_stream</code> / <code>observe</code> / <code>compress_context</code></span></td></tr><tr><td><code>agent/_config.py</code></td><td><span lang="zh"><code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code></span><span lang="en"><code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code></span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>Agent</code> = name + system_prompt + model + toolkit。</span><span lang="en"><code>Agent</code> = name + system_prompt + model + toolkit.</span></li><li><span lang="zh">它运行 ReAct（推理-行动）循环，自动编排工具调用。</span><span lang="en">It runs a ReAct (reason-act) loop, orchestrating tool calls automatically.</span></li><li><span lang="zh"><code>reply</code> 要结果，<code>reply_stream</code> 要过程。</span><span lang="en"><code>reply</code> for the result, <code>reply_stream</code> for the process.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">你想先把一段背景资料「喂」给 agent、记进对话历史，但<strong>这一步先别让它回复</strong>。该用哪个方法？</span><span lang="en">You want to feed the agent some background and record it in the conversation, but <strong>without making it reply yet</strong>. Which method do you use?</span></div><ol class="quiz-opts"><li><span lang="zh"><code>agent.observe(msgs)</code>——只把消息写入记忆/历史，不触发回复</span><span lang="en"><code>agent.observe(msgs)</code> — records messages into memory/history, no reply</span></li><li><span lang="zh"><code>agent.reply(msg)</code>——它会记录消息但不会生成回复</span><span lang="en"><code>agent.reply(msg)</code> — it records the message but doesn't generate a reply</span></li><li><span lang="zh"><code>agent.reply_stream(msg)</code>——流式模式下只记录、不回复</span><span lang="en"><code>agent.reply_stream(msg)</code> — in streaming mode it only records, no reply</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh"><code>agent.observe(msgs)</code>——只把消息写入记忆/历史，不触发回复</span><span lang="en"><code>agent.observe(msgs)</code> — records messages into memory/history, no reply</span></div><div lang="zh">三个方法别混：<code>reply</code> 返回最终 <code>AssistantMsg</code>，<code>reply_stream</code> 流式产出事件，<code>observe</code> 则<strong>只把消息并入记忆而不回复</strong>——常用于「先给上下文，稍后再让它答」。</div><div lang="en">Don't conflate the three: <code>reply</code> returns the final <code>AssistantMsg</code>, <code>reply_stream</code> streams events, and <code>observe</code> <strong>only folds messages into memory without replying</strong> — handy to "give context now, ask later".</div></details></div></section>
+asyncio.run(main())</pre><div class="code-cap" lang="zh">最小可用 agent；reply 返回最终 AssistantMsg。</div><div class="code-cap" lang="en">A minimal working agent; reply returns the final AssistantMsg.</div></figure><h2 lang="zh">构造参数</h2><h2 lang="en">Constructor parameters</h2><table class="t"><tr><th><span lang="zh">参数</span><span lang="en">Parameter</span></th><th><span lang="zh">含义</span><span lang="en">Meaning</span></th></tr><tr><td><span lang="zh"><code>name</code></span><span lang="en"><code>name</code></span></td><td><span lang="zh">agent 标识</span><span lang="en">the agent identifier</span></td></tr><tr><td><span lang="zh"><code>system_prompt</code></span><span lang="en"><code>system_prompt</code></span></td><td><span lang="zh">系统提示（人设/指令）</span><span lang="en">the system prompt (persona/instructions)</span></td></tr><tr><td><span lang="zh"><code>model</code></span><span lang="en"><code>model</code></span></td><td><span lang="zh"><code>ChatModelBase</code> 实例</span><span lang="en">a <code>ChatModelBase</code> instance</span></td></tr><tr><td><span lang="zh"><code>toolkit</code></span><span lang="en"><code>toolkit</code></span></td><td><span lang="zh">可选的工具箱</span><span lang="en">an optional toolkit</span></td></tr><tr><td><span lang="zh"><code>middlewares</code></span><span lang="en"><code>middlewares</code></span></td><td><span lang="zh">可选的中间件列表（第 15 课）</span><span lang="en">an optional middleware list (lesson 15)</span></td></tr><tr><td><span lang="zh"><code>state</code> / <code>offloader</code></span><span lang="en"><code>state</code> / <code>offloader</code></span></td><td><span lang="zh">可选的状态与上下文卸载（第 19 / 17 课）</span><span lang="en">optional state and context offloading (lessons 19 / 17)</span></td></tr><tr><td><span lang="zh"><code>*_config</code></span><span lang="en"><code>*_config</code></span></td><td><span lang="zh"><code>ModelConfig</code> / <code>ContextConfig</code> / <code>ReActConfig</code></span><span lang="en"><code>ModelConfig</code> / <code>ContextConfig</code> / <code>ReActConfig</code></span></td></tr></table><div class="card note"><div class="tag"><span lang="zh">📌 注意</span><span lang="en">📌 Note</span></div><div lang="zh">用 <code>reply</code> 拿最终结果；用 <code>reply_stream</code> 拿事件流（第 10 课）；用 <code>observe</code> 注入消息而不立即回复。</div><div lang="en">Use <code>reply</code> for the final result; <code>reply_stream</code> for the event stream (lesson 10); <code>observe</code> to inject messages without replying.</div></div><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh"><code>Agent</code> 构造器与 <code>reply</code> / <code>reply_stream</code> / <code>observe</code> / <code>compress_context</code></span><span lang="en">the <code>Agent</code> constructor and <code>reply</code> / <code>reply_stream</code> / <code>observe</code> / <code>compress_context</code></span></td></tr><tr><td><code>agent/_config.py</code></td><td><span lang="zh"><code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code></span><span lang="en"><code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code></span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh"><code>Agent</code> = name + system_prompt + model + toolkit。</span><span lang="en"><code>Agent</code> = name + system_prompt + model + toolkit.</span></li><li><span lang="zh">它运行 ReAct（推理-行动）循环，自动编排工具调用。</span><span lang="en">It runs a ReAct (reason-act) loop, orchestrating tool calls automatically.</span></li><li><span lang="zh"><code>reply</code> 要结果，<code>reply_stream</code> 要过程。</span><span lang="en"><code>reply</code> for the result, <code>reply_stream</code> for the process.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">你想先把一段背景资料「喂」给 agent、记进对话历史，但<strong>这一步先别让它回复</strong>。该用哪个方法？</span><span lang="en">You want to feed the agent some background and record it in the conversation, but <strong>without making it reply yet</strong>. Which method do you use?</span></div><ol class="quiz-opts"><li><span lang="zh"><code>agent.observe(msgs)</code>——只把消息写入记忆/历史，不触发回复</span><span lang="en"><code>agent.observe(msgs)</code> — records messages into memory/history, no reply</span></li><li><span lang="zh"><code>agent.reply(msg)</code>——它会记录消息但不会生成回复</span><span lang="en"><code>agent.reply(msg)</code> — it records the message but doesn't generate a reply</span></li><li><span lang="zh"><code>agent.reply_stream(msg)</code>——流式模式下只记录、不回复</span><span lang="en"><code>agent.reply_stream(msg)</code> — in streaming mode it only records, no reply</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer &amp; explanation</span></summary><div class="quiz-correct"><span lang="zh"><code>agent.observe(msgs)</code>——只把消息写入记忆/历史，不触发回复</span><span lang="en"><code>agent.observe(msgs)</code> — records messages into memory/history, no reply</span></div><div lang="zh">三个方法别混：<code>reply</code> 返回最终 <code>AssistantMsg</code>，<code>reply_stream</code> 流式产出事件，<code>observe</code> 则<strong>只把消息并入记忆而不回复</strong>——常用于「先给上下文，稍后再让它答」。</div><div lang="en">Don't conflate the three: <code>reply</code> returns the final <code>AssistantMsg</code>, <code>reply_stream</code> streams events, and <code>observe</code> <strong>only folds messages into memory without replying</strong> — handy to "give context now, ask later".</div></details></div></section>
 <nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="07-tools.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">工具 Tools</span><span lang="en">Tools</span></span></a><a class="nav-link next" rel="next" href="09-event-system.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">事件系统</span><span lang="en">Event System</span></span></a></nav>
 <footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
 </div>

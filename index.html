@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }

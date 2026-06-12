@@ -315,7 +315,7 @@ LESSON_07 = blocks(
     ),
     flow(
         [("写普通函数", "Write a function"), ("注册进 Toolkit", "Register in Toolkit"),
-         ("自动生成 schema", "Auto schema"), ("模型据此选择调用", "Model picks & calls"),
+         ("自动生成 schema", "Auto schema"), ("模型据此选择调用", "Model picks &amp; calls"),
          ("执行得到结果", "Execute"), ("结果回灌上下文", "Result → context")],
         "你只写函数；schema 自动生成，模型据此决定调用，结果再观察回对话——无需手写工具描述。",
         "You only write the function; the schema is generated, the model decides the call, and "

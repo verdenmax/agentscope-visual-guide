@@ -17,10 +17,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
   --bg:#f7f7fb; --panel:#fff; --panel-2:#f1f1f8; --ink:#1d2129;
-  --muted:#5b6470; --faint:#8a939f; --line:#e4e4ee;
-  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0;
-  --blue:#2563eb; --blue-soft:#e7efff; --amber:#b4690e; --amber-soft:#fdf1dd;
-  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#d23f3f; --red-soft:#fbe6e6;
+  --muted:#5b6470; --faint:#6b7280; --line:#e4e4ee;
+  --accent:#6d5ae6; --accent-soft:#ece8fc; --accent-ink:#4b3bc0; --on-accent:#fff;
+  --blue:#1f56d3; --blue-soft:#e7efff; --amber:#965104; --amber-soft:#fdf1dd;
+  --purple:#7c3aed; --purple-soft:#f0e9ff; --red:#c12f2f; --red-soft:#fbe6e6;
   --code-bg:#0f172a; --code-ink:#e2e8f0; --code-line:#1e293b;
   --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px rgba(16,24,40,.06);
   --radius:14px;
@@ -29,7 +29,7 @@
   :root {
     --bg:#0e1016; --panel:#161a22; --panel-2:#1d212c; --ink:#e6edf3;
     --muted:#9aa6b2; --faint:#6e7a86; --line:#2a2f3c;
-    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb;
+    --accent:#9b8cf0; --accent-soft:#241d44; --accent-ink:#c9bdfb; --on-accent:#160f24;
     --blue:#6ea8fe; --blue-soft:#16243f; --amber:#e0a44a; --amber-soft:#33270f;
     --purple:#b794f6; --purple-soft:#271a40; --red:#f08080; --red-soft:#3a1a1a;
     --code-bg:#0a0f1a; --code-ink:#d8e2f0; --code-line:#14202f;
@@ -37,6 +37,10 @@
   }
 }
 html { scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
 body {
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC",
     "PingFang SC","Microsoft YaHei",system-ui,sans-serif;
@@ -44,9 +48,11 @@ body {
   -webkit-font-smoothing:antialiased;
 }
 a { color:var(--accent); text-decoration:none; }
-code,.mono { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
+a:focus-visible, button:focus-visible, summary:focus-visible, input:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-family:"SF Mono","JetBrains Mono","Fira Code",ui-monospace,
   Menlo,Consolas,monospace; overflow-wrap:break-word; }
-p > code, li code, td code, .acc-body code {
+:not(pre) > code {
   background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
   padding:.06em .38em; font-size:.88em; color:var(--accent-ink); }
 
@@ -147,10 +153,11 @@ pre.code .nu { color: #f78c6c; }
 .step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
   top: 34px; bottom: -2px; width: 2px; background: var(--line); }
 .step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-  color: #fff; display: flex; align-items: center; justify-content: center;
+  color: var(--on-accent); display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
+.step-c { flex: 1; min-width: 0; }
 
 /* ---- horizontal flow diagram ---- */
 .flow-fig { margin: 1.3rem 0; }
@@ -235,7 +242,7 @@ table.t tr:last-child td { border-bottom: none; }
   padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
   border: 1px solid var(--line); background: var(--panel); color: var(--ink);
   font-size: 1rem; box-shadow: var(--shadow); }
-.toc-search input:focus { outline: none; border-color: var(--accent); }
+.toc-search input:focus { border-color: var(--accent); }
 .qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
   color: var(--faint); font-size: .8rem; pointer-events: none; }
 .toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
@@ -247,7 +254,7 @@ table.t tr:last-child td { border-bottom: none; }
 .lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
 .index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
 .pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
-  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  padding: .55rem 1.1rem; background: var(--accent); color: var(--on-accent);
   border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
 .pdf-btn:hover { background: var(--accent-ink); }
 .anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
@@ -283,7 +290,7 @@ vectors = resp.embeddings        <span class="cm"># 每条文本一个向量 / o
 
 Document -&gt; chunk -&gt; embed (AgentScope) -&gt; vector store (yours) -&gt;
     at query time: embed the question -&gt; nearest-neighbor search -&gt;
-    stuff the relevant chunks into context -&gt; hand to the Agent</pre></div></details><table class="t"><tr><th><span lang="zh">厂商</span><span lang="en">Vendor</span></th><th><span lang="zh">类</span><span lang="en">Class</span></th></tr><tr><td><span lang="zh">DashScope</span><span lang="en">DashScope</span></td><td><span lang="zh"><code>DashScopeEmbeddingModel</code></span><span lang="en"><code>DashScopeEmbeddingModel</code></span></td></tr><tr><td><span lang="zh">OpenAI</span><span lang="en">OpenAI</span></td><td><span lang="zh"><code>OpenAIEmbeddingModel</code></span><span lang="en"><code>OpenAIEmbeddingModel</code></span></td></tr><tr><td><span lang="zh">Gemini / Ollama</span><span lang="en">Gemini / Ollama</span></td><td><span lang="zh"><code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code></span><span lang="en"><code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code></span></td></tr></table><div class="card note"><div class="tag"><span lang="zh">📌 注意</span><span lang="en">📌 Note</span></div><div lang="zh">嵌入调用通常是<strong>批量且重复</strong>的（同一批文档反复嵌入）。<code>FileEmbeddingCache</code> 把结果缓存到磁盘，命中即跳过 API 调用——既省钱又提速。缓存基类是 <code>EmbeddingCacheBase</code>，可自定义后端。</div><div lang="en">Embedding calls are often <strong>batched and repetitive</strong> (re-embedding the same documents). <code>FileEmbeddingCache</code> caches results to disk and skips the API call on a hit — saving money and time. The base is <code>EmbeddingCacheBase</code>, so you can plug in your own backend.</div></div><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>embedding/_embedding_base.py</code></td><td><span lang="zh"><code>EmbeddingModelBase</code>（可调用，async）</span><span lang="en"><code>EmbeddingModelBase</code> (async-callable)</span></td></tr><tr><td><code>embedding/_dashscope/_model.py</code></td><td><span lang="zh"><code>DashScopeEmbeddingModel</code> 等厂商实现</span><span lang="en"><code>DashScopeEmbeddingModel</code> and other vendor implementations</span></td></tr><tr><td><code>embedding/_file_cache.py</code></td><td><span lang="zh"><code>FileEmbeddingCache</code>（<code>EmbeddingCacheBase</code>）</span><span lang="en"><code>FileEmbeddingCache</code> (<code>EmbeddingCacheBase</code>)</span></td></tr><tr><td><code>embedding/_embedding_response.py</code></td><td><span lang="zh"><code>EmbeddingResponse</code></span><span lang="en"><code>EmbeddingResponse</code></span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh">嵌入把文本变向量，是检索 / RAG 的基础。</span><span lang="en">Embeddings turn text into vectors — the basis for retrieval / RAG.</span></li><li><span lang="zh"><code>EmbeddingModelBase</code> 统一各厂商；调用是 async。</span><span lang="en"><code>EmbeddingModelBase</code> unifies vendors; calls are async.</span></li><li><span lang="zh">缓存（<code>FileEmbeddingCache</code>）避免重复计算。</span><span lang="en">Caching (<code>FileEmbeddingCache</code>) avoids recomputation.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">关于 AgentScope 的嵌入（embedding）支持，下列哪项正确？</span><span lang="en">Which statement about AgentScope's embedding support is correct?</span></div><ol class="quiz-opts"><li><span lang="zh">它提供嵌入模型 + 缓存这块基石，但向量库（最近邻检索）留给你的应用自选</span><span lang="en">It provides the embedding-model + caching foundation, but leaves the vector store (nearest-neighbor search) to your application</span></li><li><span lang="zh">它自带向量数据库，开箱即可存储并检索向量</span><span lang="en">It ships a built-in vector database, so you can store and search vectors out of the box</span></li><li><span lang="zh">嵌入模型调用是同步的，直接返回向量列表</span><span lang="en">Embedding model calls are synchronous and return a plain list of vectors</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh">它提供嵌入模型 + 缓存这块基石，但向量库（最近邻检索）留给你的应用自选</span><span lang="en">It provides the embedding-model + caching foundation, but leaves the vector store (nearest-neighbor search) to your application</span></div><div lang="zh">AgentScope 只提供嵌入与缓存的基石，向量库由你选型；嵌入模型是 async 可调用对象，返回 EmbeddingResponse。</div><div lang="en">AgentScope provides only the embedding + cache foundation; you choose the vector store. Embedding models are async-callable and return an EmbeddingResponse.</div></details></div></section>
+    stuff the relevant chunks into context -&gt; hand to the Agent</pre></div></details><table class="t"><tr><th><span lang="zh">厂商</span><span lang="en">Vendor</span></th><th><span lang="zh">类</span><span lang="en">Class</span></th></tr><tr><td><span lang="zh">DashScope</span><span lang="en">DashScope</span></td><td><span lang="zh"><code>DashScopeEmbeddingModel</code></span><span lang="en"><code>DashScopeEmbeddingModel</code></span></td></tr><tr><td><span lang="zh">OpenAI</span><span lang="en">OpenAI</span></td><td><span lang="zh"><code>OpenAIEmbeddingModel</code></span><span lang="en"><code>OpenAIEmbeddingModel</code></span></td></tr><tr><td><span lang="zh">Gemini / Ollama</span><span lang="en">Gemini / Ollama</span></td><td><span lang="zh"><code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code></span><span lang="en"><code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code></span></td></tr></table><div class="card note"><div class="tag"><span lang="zh">📌 注意</span><span lang="en">📌 Note</span></div><div lang="zh">嵌入调用通常是<strong>批量且重复</strong>的（同一批文档反复嵌入）。<code>FileEmbeddingCache</code> 把结果缓存到磁盘，命中即跳过 API 调用——既省钱又提速。缓存基类是 <code>EmbeddingCacheBase</code>，可自定义后端。</div><div lang="en">Embedding calls are often <strong>batched and repetitive</strong> (re-embedding the same documents). <code>FileEmbeddingCache</code> caches results to disk and skips the API call on a hit — saving money and time. The base is <code>EmbeddingCacheBase</code>, so you can plug in your own backend.</div></div><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>embedding/_embedding_base.py</code></td><td><span lang="zh"><code>EmbeddingModelBase</code>（可调用，async）</span><span lang="en"><code>EmbeddingModelBase</code> (async-callable)</span></td></tr><tr><td><code>embedding/_dashscope/_model.py</code></td><td><span lang="zh"><code>DashScopeEmbeddingModel</code> 等厂商实现</span><span lang="en"><code>DashScopeEmbeddingModel</code> and other vendor implementations</span></td></tr><tr><td><code>embedding/_file_cache.py</code></td><td><span lang="zh"><code>FileEmbeddingCache</code>（<code>EmbeddingCacheBase</code>）</span><span lang="en"><code>FileEmbeddingCache</code> (<code>EmbeddingCacheBase</code>)</span></td></tr><tr><td><code>embedding/_embedding_response.py</code></td><td><span lang="zh"><code>EmbeddingResponse</code></span><span lang="en"><code>EmbeddingResponse</code></span></td></tr></table></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh">嵌入把文本变向量，是检索 / RAG 的基础。</span><span lang="en">Embeddings turn text into vectors — the basis for retrieval / RAG.</span></li><li><span lang="zh"><code>EmbeddingModelBase</code> 统一各厂商；调用是 async。</span><span lang="en"><code>EmbeddingModelBase</code> unifies vendors; calls are async.</span></li><li><span lang="zh">缓存（<code>FileEmbeddingCache</code>）避免重复计算。</span><span lang="en">Caching (<code>FileEmbeddingCache</code>) avoids recomputation.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">关于 AgentScope 的嵌入（embedding）支持，下列哪项正确？</span><span lang="en">Which statement about AgentScope's embedding support is correct?</span></div><ol class="quiz-opts"><li><span lang="zh">它提供嵌入模型 + 缓存这块基石，但向量库（最近邻检索）留给你的应用自选</span><span lang="en">It provides the embedding-model + caching foundation, but leaves the vector store (nearest-neighbor search) to your application</span></li><li><span lang="zh">它自带向量数据库，开箱即可存储并检索向量</span><span lang="en">It ships a built-in vector database, so you can store and search vectors out of the box</span></li><li><span lang="zh">嵌入模型调用是同步的，直接返回向量列表</span><span lang="en">Embedding model calls are synchronous and return a plain list of vectors</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer &amp; explanation</span></summary><div class="quiz-correct"><span lang="zh">它提供嵌入模型 + 缓存这块基石，但向量库（最近邻检索）留给你的应用自选</span><span lang="en">It provides the embedding-model + caching foundation, but leaves the vector store (nearest-neighbor search) to your application</span></div><div lang="zh">AgentScope 只提供嵌入与缓存的基石，向量库由你选型；嵌入模型是 async 可调用对象，返回 EmbeddingResponse。</div><div lang="en">AgentScope provides only the embedding + cache foundation; you choose the vector store. Embedding models are async-callable and return an EmbeddingResponse.</div></details></div></section>
 <nav class="lesson-nav"><a class="nav-link prev" rel="prev" href="20-skills.html"><span class="nav-dir"><span lang="zh">← 上一课</span><span lang="en">← Prev</span></span><span class="nav-title"><span lang="zh">技能系统</span><span lang="en">Skills</span></span></a><a class="nav-link next" rel="next" href="22-tts.html"><span class="nav-dir"><span lang="zh">下一课 →</span><span lang="en">Next →</span></span><span class="nav-title"><span lang="zh">TTS 语音</span><span lang="en">TTS</span></span></a></nav>
 <footer class="foot"><span lang="zh">对照 AgentScope 2.0 源码，核验于 2026-06。本教程为独立第三方学习材料。</span><span lang="en">Aligned with AgentScope 2.0 source, verified 2026-06. Independent third-party learning material.</span></footer>
 </div>
