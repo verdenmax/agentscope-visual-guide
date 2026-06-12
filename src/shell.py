@@ -235,6 +235,31 @@ table.t tr:last-child td { border-bottom: none; }
   color: var(--accent-ink); display: inline-flex; align-items: center;
   justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
 .ix-title { font-weight: 650; color: var(--ink); }
+.ix-main { display: flex; flex-direction: column; min-width: 0; }
+.ix-sub { font-size: .8rem; color: var(--muted); margin-top: .12rem; }
+
+/* ---- index: search, legend, pdf, version note ---- */
+.toc-search { position: relative; margin: 1.8rem 0 .3rem; }
+.toc-search input { width: 100%; box-sizing: border-box;
+  padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  font-size: 1rem; box-shadow: var(--shadow); }
+.toc-search input:focus { outline: none; border-color: var(--accent); }
+.qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+  color: var(--faint); font-size: .8rem; pointer-events: none; }
+.toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;
+  font-size: .8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.lg-analogy { background: var(--amber); } .lg-src { background: var(--purple); }
+.lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
+.index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
+.pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
+.pdf-btn:hover { background: var(--accent-ink); }
+.anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
 """
 
 _HEAD_LANG_SCRIPT = (
@@ -317,6 +342,58 @@ PAGES = [
     ("29-glossary.html", "术语表 · 概念索引", "Glossary",
      "第八部分 · 速查", "Part 8 · Reference"),
 ]
+
+
+# One-line bilingual subtitle per lesson, shown on the index for scannability.
+_SUBTITLES = {
+    "00-setup.html": ("安装 · 配密钥 · 跑通第一个程序", "Install · key · first run"),
+    "01-what-is-agentscope.html": ("解决什么问题 · 核心心智模型", "The problem it solves · mental model"),
+    "02-architecture.html": ("模块全景与它们如何协作", "The module map and how they fit"),
+    "03-lifecycle.html": ("UserMsg → 事件流 → 回复", "UserMsg → event stream → reply"),
+    "04-messages.html": ("Msg 家族 + 内容块", "The Msg family + content blocks"),
+    "05-chat-models.html": ("ChatModelBase + 多厂商 + ChatResponse", "ChatModelBase + vendors + ChatResponse"),
+    "06-credentials.html": ("密钥与模型配置解耦", "Decouple secrets from model config"),
+    "07-tools.html": ("Toolkit · 内置工具 · 自动 schema", "Toolkit · built-ins · auto schema"),
+    "08-agents-intro.html": ("Agent(...) · ReAct 循环", "Agent(...) · the ReAct loop"),
+    "09-event-system.html": ("EventType 全谱 · START→DELTA→END", "EventType spectrum · START→DELTA→END"),
+    "10-streaming.html": ("async for · evt.delta · 累积", "async for · evt.delta · accumulate"),
+    "11-formatter.html": ("Msg → 厂商请求 · Chat vs MultiAgent", "Msg → vendor request · Chat vs MultiAgent"),
+    "12-agent-internals.html": ("推理-行动循环 + 中间件链", "Reason-act loop + middleware chain"),
+    "13-toolkit-internals.html": ("schema(async) · 执行 · 分组", "schema (async) · call · groups"),
+    "14-model-internals.html": ("ChatResponse · 结构化输出 · 重试", "ChatResponse · structured output · retries"),
+    "15-middleware.html": ("on_* 钩子环绕循环", "on_* hooks around the loop"),
+    "16-permission.html": ("放行/拒绝/确认 · 回路 · bypass", "allow/deny/confirm · round-trip · bypass"),
+    "17-workspace.html": ("本地/Docker/E2B · Offloader", "local/Docker/E2B · Offloader"),
+    "18-mcp.html": ("接入外部 MCP 工具 · stdio/http", "plug in external MCP tools · stdio/http"),
+    "19-state-tasks.html": ("AgentState · 任务规划工具", "AgentState · task-planning tools"),
+    "20-skills.html": ("可复用的 Markdown 操作手册", "reusable markdown playbooks"),
+    "21-embeddings.html": ("向量 · 缓存 · RAG 基础", "vectors · cache · RAG basis"),
+    "22-tts.html": ("文本转语音 · 实时 · 中间件", "text-to-speech · realtime · middleware"),
+    "23-agent-service.html": ("create_app · 多租户/多会话", "create_app · multi-tenant/session"),
+    "24-message-bus.html": ("发布订阅 + 注册表 + 取消", "pub/sub + registry + cancel"),
+    "25-agent-team.html": ("领导-工作 agent 协作", "leader-worker collaboration"),
+    "26-custom-tools.html": ("FunctionTool / ToolBase", "FunctionTool / ToolBase"),
+    "27-custom-middleware.html": ("写一个 on_* 钩子", "write an on_* hook"),
+    "28-capstone.html": ("把所有零件拼成一个 Agent", "assemble all the parts into one agent"),
+    "29-glossary.html": ("术语一句话查 + 跳转", "one-line term lookup + jump"),
+}
+
+_SEARCH_JS = (
+    "<script>(function(){var q=document.getElementById('q');if(!q)return;"
+    "var empty=document.getElementById('tocempty'),count=document.getElementById('qcount');"
+    "var items=[].slice.call(document.querySelectorAll('.ix-list li'));"
+    "var parts=[].slice.call(document.querySelectorAll('.ix-part'));"
+    "function run(){var term=(q.value||'').toLowerCase().trim(),n=0;"
+    "items.forEach(function(li){var a=li.querySelector('a');"
+    "var hit=!term||(a.getAttribute('data-s')||'').indexOf(term)>=0;"
+    "li.style.display=hit?'':'none';if(hit)n++;});"
+    "parts.forEach(function(sec){var vis=[].slice.call("
+    "sec.querySelectorAll('.ix-list li')).some(function(li){return li.style.display!=='none';});"
+    "sec.style.display=vis?'':'none';});"
+    "if(empty)empty.style.display=(term&&n===0)?'block':'none';"
+    "if(count)count.textContent=term?(''+n):'';}"
+    "q.addEventListener('input',run);})();</script>"
+)
 
 
 def _page_index(fname: str) -> int:
@@ -407,10 +484,14 @@ def index_page(standalone: bool, lesson_prefix: str) -> str:
         for f, zt, et in groups[(zp, ep)]:
             n += 1
             title = t(esc(zt), esc(et))
+            sz, se = _SUBTITLES.get(f, ("", ""))
+            sub = t(esc(sz), esc(se))
+            data_s = esc(f"{zt} {et} {sz} {se}".lower())
             items += (
-                f'<li><a href="{lesson_prefix}{f}">'
+                f'<li><a href="{lesson_prefix}{f}" data-s="{data_s}">'
                 f'<span class="ix-num">{n:02d}</span>'
-                f'<span class="ix-title">{title}</span></a></li>'
+                f'<span class="ix-main"><span class="ix-title">{title}</span>'
+                f'<span class="ix-sub">{sub}</span></span></a></li>'
             )
         part_lbl = t(esc(zp), esc(ep))
         sections += (
@@ -424,9 +505,46 @@ def index_page(standalone: bool, lesson_prefix: str) -> str:
         "Understand AgentScope 2.0 from zero: macro overview + internals, "
         "30 lessons, bilingual.",
     )
+    legend = (
+        '<div class="legend">'
+        f'<span><i class="lg-analogy"></i>{t("生活类比", "Analogy")}</span>'
+        f'<span><i class="lg-src"></i>{t("源码对应", "Source mapping")}</span>'
+        f'<span><i class="lg-key"></i>{t("关键要点", "Key takeaways")}</span>'
+        f'<span><i class="lg-quiz"></i>{t("小测验", "Quiz")}</span>'
+        "</div>"
+    )
+    pdf_zh = t("📄 下载 PDF（中文）", "📄 PDF · 中文")
+    pdf_en = t("📄 下载 PDF（英文）", "📄 PDF · English")
+    actions = (
+        '<div class="index-actions">'
+        f'<a class="pdf-btn" href="agentscope-visual-guide-zh.pdf">{pdf_zh}</a>'
+        f'<a class="pdf-btn" href="agentscope-visual-guide-en.pdf">{pdf_en}</a>'
+        "</div>"
+    )
+    anchor = t(
+        "对照 AgentScope 2.0 源码，核验于 2026-06。源码引用以「文件 + 符号」为主。",
+        "Aligned with AgentScope 2.0 source, verified 2026-06. Citations are file + symbol.",
+    )
     hero = (
         '<div class="hero index-hero">'
-        f'<h1>{title}</h1><p class="lead">{lead}</p></div>'
+        f"<h1>{title}</h1><p class=\"lead\">{lead}</p>"
+        f"{legend}{actions}"
+        f'<p class="anchor-note">{anchor}</p></div>'
+    )
+    search = (
+        '<div class="toc-search">'
+        '<input id="q" type="search" autocomplete="off" '
+        'placeholder="🔎 搜索课程 / Search lessons…" aria-label="搜索 / Search">'
+        '<span class="qcount" id="qcount"></span></div>'
+    )
+    empty = (
+        '<div class="toc-empty" id="tocempty">'
+        f'{t("没有匹配的课程，换个关键词试试。", "No matching lessons — try another keyword.")}'
+        "</div>"
+    )
+    count_pill = t(
+        f"共 {len(PAGES)} 课 · {len(order)} 部分",
+        f"{len(PAGES)} lessons · {len(order)} parts",
     )
     sitebar = t("图解教程", "Visual Guide")
     meta = head_meta(
@@ -444,9 +562,10 @@ def index_page(standalone: bool, lesson_prefix: str) -> str:
         f"{meta}\n<style>{CSS}</style>\n</head>\n<body>\n"
         '<div class="topbar"><div class="topbar-inner">\n'
         f'<span class="home"><b>AgentScope</b> {sitebar}</span>\n'
+        f'<span class="pill">{count_pill}</span>\n'
         '<button id="langtoggle" class="lang-toggle" type="button" '
         'aria-label="切换语言 / Switch language">EN</button>\n'
-        "</div></div>\n"
-        f'<div class="wrap">{hero}{sections}</div>\n'
-        f"{_TOGGLE_SCRIPT}\n</body>\n</html>"
+        '</div><div class="progress"><span style="width:100%"></span></div></div>\n'
+        f'<div class="wrap">{hero}{search}{sections}{empty}</div>\n'
+        f"{_TOGGLE_SCRIPT}\n{_SEARCH_JS}\n</body>\n</html>"
     )

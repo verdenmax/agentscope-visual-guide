@@ -96,3 +96,11 @@ class TestIndex(unittest.TestCase):
         out = shell.index_page(standalone=True, lesson_prefix="lessons/")
         self.assertIn("AgentScope", out)
         self.assertIn('id="langtoggle"', out)
+
+    def test_index_has_search_subtitles_and_pdf(self):
+        out = shell.index_page(standalone=True, lesson_prefix="lessons/")
+        self.assertIn('id="q"', out)                       # search box
+        self.assertIn('class="ix-sub"', out)               # per-lesson subtitle
+        self.assertIn("agentscope-visual-guide-zh.pdf", out)  # zh PDF button
+        self.assertIn("agentscope-visual-guide-en.pdf", out)  # en PDF button
+        self.assertIn('class="legend"', out)               # legend

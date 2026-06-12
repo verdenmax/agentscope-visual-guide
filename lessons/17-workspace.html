@@ -213,6 +213,31 @@ table.t tr:last-child td { border-bottom: none; }
   color: var(--accent-ink); display: inline-flex; align-items: center;
   justify-content: center; font-weight: 700; font-size: .85rem; flex-shrink: 0; }
 .ix-title { font-weight: 650; color: var(--ink); }
+.ix-main { display: flex; flex-direction: column; min-width: 0; }
+.ix-sub { font-size: .8rem; color: var(--muted); margin-top: .12rem; }
+
+/* ---- index: search, legend, pdf, version note ---- */
+.toc-search { position: relative; margin: 1.8rem 0 .3rem; }
+.toc-search input { width: 100%; box-sizing: border-box;
+  padding: .72rem 2.8rem .72rem 1rem; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  font-size: 1rem; box-shadow: var(--shadow); }
+.toc-search input:focus { outline: none; border-color: var(--accent); }
+.qcount { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%);
+  color: var(--faint); font-size: .8rem; pointer-events: none; }
+.toc-empty { display: none; color: var(--muted); padding: 1.2rem; text-align: center; }
+.legend { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;
+  font-size: .8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: .4rem; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.lg-analogy { background: var(--amber); } .lg-src { background: var(--purple); }
+.lg-key { background: var(--accent); } .lg-quiz { background: var(--blue); }
+.index-actions { margin-top: 1.2rem; display: flex; gap: .6rem; flex-wrap: wrap; }
+.pdf-btn { display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.1rem; background: var(--accent); color: #fff;
+  border-radius: 10px; font-size: .9rem; font-weight: 650; box-shadow: var(--shadow); }
+.pdf-btn:hover { background: var(--accent-ink); }
+.anchor-note { margin: .9rem 0 0; color: var(--faint); font-size: .8rem; }
 </style>
 </head>
 <body>

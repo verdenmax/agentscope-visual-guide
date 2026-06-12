@@ -8,6 +8,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_ROOT = os.path.abspath(os.path.join(HERE, ".."))
 _HREF = re.compile(r'href="([^"]+)"')
 _EXTERNAL = ("http://", "https://", "#", "mailto:", "data:")
+# PDFs are produced by CI (build_print + headless Chrome), not by build.py,
+# and the deploy workflow copies them next to index.html — so don't flag them.
+_SKIP_SUFFIX = (".pdf",)
 
 
 def _html_files(root: str) -> list:
@@ -36,7 +39,7 @@ def check(root: str = DEFAULT_ROOT) -> list:
             if href.startswith(_EXTERNAL):
                 continue
             target = href.split("#", 1)[0]
-            if not target:
+            if not target or target.endswith(_SKIP_SUFFIX):
                 continue
             path = os.path.normpath(os.path.join(base, target))
             if not os.path.exists(path):
