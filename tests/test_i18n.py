@@ -171,6 +171,18 @@ class TestConvenience(unittest.TestCase):
         self.assertIn('<span lang="en">send a message</span>', out)
         self.assertNotIn("<details", out)  # visible, not collapsed
 
+    def test_flow_renders_nodes_and_arrows(self):
+        out = i18n.flow([("用户", "User"), ("推理", "Reason"), ("回复", "Reply")])
+        self.assertIn('<div class="flow">', out)
+        self.assertEqual(out.count('class="fnode"'), 3)
+        self.assertEqual(out.count('class="farrow"'), 2)  # n-1 arrows
+        self.assertIn('<span lang="zh">用户</span>', out)
+
+    def test_flow_caption_bilingual(self):
+        out = i18n.flow([("a", "a"), ("b", "b")], cap_zh="说明", cap_en="caption")
+        self.assertIn('<figure class="flow-fig">', out)
+        self.assertIn('<div class="flow-cap" lang="zh">说明</div>', out)
+
 
 class TestSourceMap(unittest.TestCase):
     def test_source_map_renders_file_and_desc(self):

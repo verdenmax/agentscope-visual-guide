@@ -7,7 +7,7 @@ AgentScope 2.0 source tree (``src/agentscope/...``).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t, steps,
+    source_map, analogy, note, tip, important, highlight, blocks, t, steps, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -238,6 +238,14 @@ LESSON_02 = blocks(
         "understandable</strong> modules. Build this panorama first and every later "
         "lesson will slot neatly into place.",
     ),
+    flow(
+        [("你的代码", "Your code"), ("Agent 编排", "Agent orchestrates"),
+         ("Model 决策", "Model decides"), ("Tool 执行", "Tool runs"),
+         ("Event 汇报", "Events report back")],
+        "各模块各司其职，由 Agent 串成一条请求链路；权限与工作区在 Tool 执行前后把关。",
+        "Each module has one job; the Agent threads them into a request pipeline, with "
+        "permissions and workspace gating around Tool execution.",
+    ),
     analogy(
         "把它想成一间<strong>智能工坊</strong>：模型是「大脑」，工具是「手」，"
         "权限是「门禁」，工作区是「车间」，事件流是「监控大屏」，而服务层（app）是「前台与调度室」。",
@@ -358,6 +366,13 @@ LESSON_03 = blocks(
         "This lesson follows one <code>reply_stream</code> call to see how a single user "
         "message travels through the whole framework and becomes a stream of "
         "<strong>events</strong> plus an assistant reply.",
+    ),
+    flow(
+        [("UserMsg", "UserMsg"), ("推理", "Reason"), ("行动·调用工具", "Act · call tools"),
+         ("观察结果", "Observe"), ("AssistantMsg", "AssistantMsg")],
+        "推理↔行动↔观察 之间会按需循环多轮，全程对外发出事件；最后一轮才产出 AssistantMsg。",
+        "Reason↔Act↔Observe loop repeats as needed, emitting events throughout; only the "
+        "final round yields the AssistantMsg.",
     ),
     analogy(
         "像点一杯手冲咖啡：你下单（<code>UserMsg</code>），咖啡师先<strong>想</strong>用什么豆"

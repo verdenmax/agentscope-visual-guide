@@ -6,7 +6,7 @@ model/_base.py, model/_model_response.py, middleware/_base.py and impls).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t, steps,
+    source_map, analogy, note, tip, important, highlight, blocks, t, steps, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -21,6 +21,14 @@ LESSON_12 = blocks(
         "<code>reply_stream</code> is a <strong>reasoning-acting loop</strong> where each step "
         "passes through a <strong>middleware chain</strong> and tool calls are gated by a "
         "<strong>permission engine</strong>.",
+    ),
+    flow(
+        [("收到消息", "Message in"), ("reasoning 推理", "reasoning"),
+         ("有工具调用？", "tool calls?"), ("acting 执行（经权限）", "acting (gated)"),
+         ("结果回灌记忆", "results → memory"), ("无工具 → 收尾", "no tools → finish")],
+        "循环条件很简单：模型这一轮<strong>提出工具调用</strong>就继续 acting，<strong>不提</strong>就结束并返回最终回复。",
+        "The loop rule is simple: if this round <strong>proposes tool calls</strong> it goes to "
+        "acting; if <strong>none</strong>, it stops and returns the final reply.",
     ),
     analogy(
         "像一条<strong>装配流水线</strong>：原料（消息）进来，经过若干工位（中间件钩子）层层加工，"
@@ -469,35 +477,45 @@ QUIZZES: dict = {}
 
 QUIZZES["12-agent-internals.html"] = [
     (
-        "在推理-行动循环中，一个工具执行完之后，紧接着会发生什么？",
-        "In the reasoning-acting loop, what happens right after a tool finishes executing?",
+        "随着「推理-行动」多轮迭代，对话上下文会越来越长。Agent 内部靠什么避免上下文<strong>无限膨胀</strong>？",
+        "As the reason-act loop iterates, the context keeps growing. Internally, what keeps it "
+        "from <strong>growing without bound</strong>?",
         [
-            ("结果被「观察」回上下文，循环回到推理，可能再触发新调用，直到模型给出最终答案",
-             "The result is observed back into context and the loop returns to reasoning (possibly "
-             "triggering more calls) until the model produces a final answer", True),
-            ("工具的原始输出就是最终回复，循环立即结束",
-             "The tool's raw output becomes the final reply and the loop ends immediately", False),
-            ("Agent 跳过推理，直接连续把其余工具全部执行完",
-             "The agent skips reasoning and just runs all the remaining tools back-to-back", False),
+            ("<code>compress_context</code> 压缩历史 + <code>offloader</code> 把超长内容卸载到工作区、按需取回",
+             "<code>compress_context</code> compresses history + the <code>offloader</code> offloads "
+             "oversized content to the workspace and fetches it back on demand", True),
+            ("每轮都丢弃之前所有历史，只保留最新一条消息",
+             "Each round discards all prior history, keeping only the latest message", False),
+            ("不做处理，靠模型自己忽略多余的上下文",
+             "Nothing — it relies on the model to ignore the excess context itself", False),
         ],
-        "工具结果回灌上下文后循环返回推理——这正是「回复是一个循环，而非一次性调用」。",
-        "Tool results feed back into context and the loop returns to reasoning — that's why a reply "
-        "is a loop, not a one-shot call.",
+        "长循环会撑大上下文。Agent 用 <code>compress_context</code> 压缩历史、用 <code>offloader</code> "
+        "把超长上下文 / 工具结果卸载出去并按需取回——既不无限膨胀，也不会粗暴丢掉历史。",
+        "A long loop bloats the context. The Agent uses <code>compress_context</code> to compress "
+        "history and the <code>offloader</code> to offload oversized context / tool results and fetch "
+        "them back — neither growing unbounded nor crudely throwing history away.",
     ),
 ]
 
 QUIZZES["13-toolkit-internals.html"] = [
     (
-        "关于 <code>get_tool_schemas</code>，下列哪项正确？",
-        "Which is true about <code>get_tool_schemas</code>?",
+        "一个工具明明已注册进 <code>Toolkit</code>，模型却「看不到」、用不了。最可能的原因是？",
+        "A tool is registered in the <code>Toolkit</code>, yet the model can't \u201csee\u201d or use it. "
+        "The most likely reason?",
         [
-            ("它是 async 方法，返回工具的 JSON schema",
-             "It is async and returns the tools' JSON schemas", True),
-            ("它是同步方法", "It is synchronous", False),
-            ("它执行工具", "It executes tools", False),
+            ("它所在的 <code>ToolGroup</code> 当前未激活——分组的「启用/停用」把它挡在了模型可见列表之外",
+             "Its <code>ToolGroup</code> is currently inactive — the group enable/disable mechanism "
+             "keeps it out of the list the model sees", True),
+            ("必须重启进程，注册的工具才会对模型生效",
+             "You must restart the process before registered tools take effect", False),
+            ("<code>get_tool_schemas</code> 默认隐藏所有工具，需手动逐个开启",
+             "<code>get_tool_schemas</code> hides all tools by default; you enable them one by one", False),
         ],
-        "get_tool_schemas 是异步方法（取代旧的 get_function_schemas），需 await。",
-        "get_tool_schemas is async (replacing the old get_function_schemas) and must be awaited.",
+        "Toolkit 支持按 <code>ToolGroup</code> 分组并在运行时启用/停用：未激活分组里的工具不会出现在 "
+        "<code>get_tool_schemas</code> 给模型的清单里（强行调用会触发 <code>ToolGroupInactiveError</code>）。",
+        "The Toolkit groups tools into <code>ToolGroup</code>s that can be enabled/disabled at runtime: "
+        "tools in an inactive group don't appear in the list <code>get_tool_schemas</code> hands the "
+        "model (calling one anyway raises <code>ToolGroupInactiveError</code>).",
     ),
 ]
 

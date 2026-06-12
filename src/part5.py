@@ -6,7 +6,7 @@ skill/, embedding/, tts/).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -598,6 +598,14 @@ LESSON_21 = blocks(
         "<strong>retrieval / RAG</strong>. <code>EmbeddingModelBase</code> unifies vendor "
         "embedding models; <code>EmbeddingCacheBase</code> / <code>FileEmbeddingCache</code> "
         "add caching to save time and money.",
+    ),
+    flow(
+        [("文档", "Documents"), ("切块", "Chunk"), ("嵌入为向量", "Embed → vectors"),
+         ("存入向量库", "Vector store"), ("查询时检索 Top-K", "Retrieve Top-K"),
+         ("拼进上下文", "Into context")],
+        "这就是 RAG 的标准管线：离线把语料嵌入入库，在线把问题嵌入后找最近的若干块喂给模型。",
+        "This is the standard RAG pipeline: embed the corpus offline, then at query time embed "
+        "the question and feed the nearest chunks to the model.",
     ),
     analogy(
         "像给每段文字一个<strong>语义坐标</strong>：意思相近的句子坐标也相近，于是「找相似」就变成"

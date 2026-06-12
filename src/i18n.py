@@ -15,7 +15,7 @@ import tokenize
 __all__ = [
     "esc", "t", "lead", "p", "h2", "h3", "card", "table", "code",
     "accordion", "keypoints", "source_map", "analogy", "note", "tip",
-    "important", "highlight", "blocks", "steps",
+    "important", "highlight", "blocks", "steps", "flow",
 ]
 
 
@@ -190,6 +190,27 @@ def steps(items: list) -> str:
             f'<div class="step-b">{t(zb, eb)}</div></div></div>'
         )
     return f'<div class="steps">{"".join(out)}</div>'
+
+
+def flow(nodes: list, cap_zh: str | None = None, cap_en: str | None = None) -> str:
+    """A horizontal flow diagram: node → node → node.
+
+    ``nodes``: list[(zh, en)]. Optional bilingual caption underneath. Use it to
+    visualize a pipeline or a sequence of stages.
+    """
+    parts = []
+    for i, (z, e) in enumerate(nodes):
+        if i:
+            parts.append('<span class="farrow">→</span>')
+        parts.append(f'<div class="fnode">{t(z, e)}</div>')
+    diagram = f'<div class="flow">{"".join(parts)}</div>'
+    if cap_zh is None and cap_en is None:
+        return diagram
+    cap = (
+        f'<div class="flow-cap" lang="zh">{cap_zh or ""}</div>'
+        f'<div class="flow-cap" lang="en">{cap_en or ""}</div>'
+    )
+    return f'<figure class="flow-fig">{diagram}{cap}</figure>'
 
 
 def source_map(

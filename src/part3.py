@@ -6,7 +6,7 @@ formatter/_formatter_base.py and the per-vendor formatters).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -20,6 +20,13 @@ LESSON_09 = blocks(
         "AgentScope breaks one reply into a stream of <strong>typed events</strong> emitted "
         "live by <code>reply_stream</code>. The <code>EventType</code> enum defines every "
         "kind, and each has a matching event class.",
+    ),
+    flow(
+        [("块 START", "block START"), ("DELTA × N（增量）", "DELTA × N (chunks)"),
+         ("块 END", "block END")],
+        "同一块的事件总是成对出现：一个 START、若干 DELTA、一个 END；END 携带该块的完整内容。",
+        "Events of one block always come paired: one START, several DELTAs, one END; the END "
+        "carries that block's full content.",
     ),
     analogy(
         "像一场体育赛事的<strong>实时解说</strong>：不是等比赛结束才告诉你比分，而是"

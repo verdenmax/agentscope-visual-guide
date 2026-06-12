@@ -174,6 +174,19 @@ pre.code .nu { color: #f78c6c; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
 
+/* ---- horizontal flow diagram ---- */
+.flow-fig { margin: 1.3rem 0; }
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem;
+  margin: 1.3rem 0; padding: 1.1rem 1rem; background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.flow-fig .flow { margin: 0; }
+.fnode { flex: 0 1 auto; display: flex; align-items: center; text-align: center;
+  padding: .55rem .8rem; border-radius: 10px; background: var(--panel-2);
+  border: 1px solid var(--line); font-size: .85rem; font-weight: 600; line-height: 1.3; }
+.farrow { display: flex; align-items: center; color: var(--accent);
+  font-size: 1.15rem; font-weight: 700; }
+.flow-cap { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;

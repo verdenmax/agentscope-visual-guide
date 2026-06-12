@@ -152,6 +152,19 @@ pre.code .nu { color: #f78c6c; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
 
+/* ---- horizontal flow diagram ---- */
+.flow-fig { margin: 1.3rem 0; }
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem;
+  margin: 1.3rem 0; padding: 1.1rem 1rem; background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.flow-fig .flow { margin: 0; }
+.fnode { flex: 0 1 auto; display: flex; align-items: center; text-align: center;
+  padding: .55rem .8rem; border-radius: 10px; background: var(--panel-2);
+  border: 1px solid var(--line); font-size: .85rem; font-weight: 600; line-height: 1.3; }
+.farrow { display: flex; align-items: center; color: var(--accent);
+  font-size: 1.15rem; font-weight: 700; }
+.flow-cap { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;
@@ -251,7 +264,7 @@ table.t tr:last-child td { border-bottom: none; }
 <div class="part"><span lang="zh">第五部分 · 进阶能力</span><span lang="en">Part 5 · Advanced</span></div>
 <h1><span lang="zh">嵌入与检索</span><span lang="en">Embeddings</span></h1>
 </div>
-<p class="lead" lang="zh"><strong>嵌入（Embedding）</strong>把文本变成向量，是<strong>检索 / RAG</strong> 的基础。<code>EmbeddingModelBase</code> 统一各厂商嵌入模型；<code>EmbeddingCacheBase</code> / <code>FileEmbeddingCache</code> 提供缓存以省钱省时。</p><p class="lead" lang="en"><strong>Embeddings</strong> turn text into vectors — the basis for <strong>retrieval / RAG</strong>. <code>EmbeddingModelBase</code> unifies vendor embedding models; <code>EmbeddingCacheBase</code> / <code>FileEmbeddingCache</code> add caching to save time and money.</p><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">像给每段文字一个<strong>语义坐标</strong>：意思相近的句子坐标也相近，于是「找相似」就变成「找最近的点」。</div><div lang="en">Like giving each piece of text a <strong>semantic coordinate</strong>: similar sentences land near each other, so "find similar" becomes "find the nearest point".</div></div><h2 lang="zh">调用嵌入模型</h2><h2 lang="en">Calling an embedding model</h2><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.embedding <span class="kw">import</span> DashScopeEmbeddingModel, FileEmbeddingCache
+<p class="lead" lang="zh"><strong>嵌入（Embedding）</strong>把文本变成向量，是<strong>检索 / RAG</strong> 的基础。<code>EmbeddingModelBase</code> 统一各厂商嵌入模型；<code>EmbeddingCacheBase</code> / <code>FileEmbeddingCache</code> 提供缓存以省钱省时。</p><p class="lead" lang="en"><strong>Embeddings</strong> turn text into vectors — the basis for <strong>retrieval / RAG</strong>. <code>EmbeddingModelBase</code> unifies vendor embedding models; <code>EmbeddingCacheBase</code> / <code>FileEmbeddingCache</code> add caching to save time and money.</p><figure class="flow-fig"><div class="flow"><div class="fnode"><span lang="zh">文档</span><span lang="en">Documents</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">切块</span><span lang="en">Chunk</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">嵌入为向量</span><span lang="en">Embed → vectors</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">存入向量库</span><span lang="en">Vector store</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">查询时检索 Top-K</span><span lang="en">Retrieve Top-K</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">拼进上下文</span><span lang="en">Into context</span></div></div><div class="flow-cap" lang="zh">这就是 RAG 的标准管线：离线把语料嵌入入库，在线把问题嵌入后找最近的若干块喂给模型。</div><div class="flow-cap" lang="en">This is the standard RAG pipeline: embed the corpus offline, then at query time embed the question and feed the nearest chunks to the model.</div></figure><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">像给每段文字一个<strong>语义坐标</strong>：意思相近的句子坐标也相近，于是「找相似」就变成「找最近的点」。</div><div lang="en">Like giving each piece of text a <strong>semantic coordinate</strong>: similar sentences land near each other, so "find similar" becomes "find the nearest point".</div></div><h2 lang="zh">调用嵌入模型</h2><h2 lang="en">Calling an embedding model</h2><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.embedding <span class="kw">import</span> DashScopeEmbeddingModel, FileEmbeddingCache
 
 embed = DashScopeEmbeddingModel(
     ...,                       <span class="cm"># credential + model name</span>

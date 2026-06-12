@@ -152,6 +152,19 @@ pre.code .nu { color: #f78c6c; }
 .step-t { font-weight: 700; margin: .3rem 0 .2rem; }
 .step-b { color: var(--muted); font-size: .95rem; }
 
+/* ---- horizontal flow diagram ---- */
+.flow-fig { margin: 1.3rem 0; }
+.flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: .5rem;
+  margin: 1.3rem 0; padding: 1.1rem 1rem; background: var(--panel);
+  border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.flow-fig .flow { margin: 0; }
+.fnode { flex: 0 1 auto; display: flex; align-items: center; text-align: center;
+  padding: .55rem .8rem; border-radius: 10px; background: var(--panel-2);
+  border: 1px solid var(--line); font-size: .85rem; font-weight: 600; line-height: 1.3; }
+.farrow { display: flex; align-items: center; color: var(--accent);
+  font-size: 1.15rem; font-weight: 700; }
+.flow-cap { font-size: .85rem; color: var(--muted); margin-top: .4rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;
@@ -251,7 +264,7 @@ table.t tr:last-child td { border-bottom: none; }
 <div class="part"><span lang="zh">第六部分 · 服务化</span><span lang="en">Part 6 · Productionization</span></div>
 <h1><span lang="zh">Agent Service</span><span lang="en">Agent Service</span></h1>
 </div>
-<p class="lead" lang="zh">把单个 agent 升级成可部署的<strong>服务</strong>：<code>create_app(...)</code> 返回一个 FastAPI 应用，内置多租户、多会话隔离，并把 agent 的事件流接到前端。</p><p class="lead" lang="en">Turn a single agent into a deployable <strong>service</strong>: <code>create_app(...)</code> returns a FastAPI app with built-in multi-tenancy and multi-session isolation, wiring the agent's event stream to a frontend.</p><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">前面几课像在自家厨房做菜；本课是开一家<strong>餐厅</strong>：要同时接待很多客人（多租户）、每桌各点各的（多会话），还要有前台、传菜和后厨调度。</div><div lang="en">Earlier lessons were cooking in your own kitchen; this one opens a <strong>restaurant</strong>: serve many guests at once (multi-tenancy), each table with its own orders (multi-session), plus a front desk, runners and kitchen dispatch.</div></div><h2 lang="zh">create_app</h2><h2 lang="en">create_app</h2><p lang="zh"><code>create_app</code> 需要三个基础设施后端：<strong>存储</strong>（会话/状态持久化）、<strong>消息总线</strong>（事件分发，见下一课）、<strong>工作区管理器</strong>（为每个会话提供隔离的执行环境）。其余都是可选扩展点。</p><p lang="en"><code>create_app</code> takes three infrastructure backends: <strong>storage</strong> (session/state persistence), a <strong>message bus</strong> (event dispatch — next lesson), and a <strong>workspace manager</strong> (an isolated execution environment per session). Everything else is an optional extension point.</p><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.app <span class="kw">import</span> create_app
+<p class="lead" lang="zh">把单个 agent 升级成可部署的<strong>服务</strong>：<code>create_app(...)</code> 返回一个 FastAPI 应用，内置多租户、多会话隔离，并把 agent 的事件流接到前端。</p><p class="lead" lang="en">Turn a single agent into a deployable <strong>service</strong>: <code>create_app(...)</code> returns a FastAPI app with built-in multi-tenancy and multi-session isolation, wiring the agent's event stream to a frontend.</p><figure class="flow-fig"><div class="flow"><div class="fnode"><span lang="zh">HTTP 请求</span><span lang="en">HTTP request</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">create_app（FastAPI）</span><span lang="en">create_app (FastAPI)</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">按租户/会话隔离</span><span lang="en">Tenant/session isolation</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">Agent 处理</span><span lang="en">Agent runs</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">事件流</span><span lang="en">Event stream</span></div><span class="farrow">→</span><div class="fnode"><span lang="zh">前端</span><span lang="en">Frontend</span></div></div><div class="flow-cap" lang="zh">服务层在 Agent 外面包了一圈：把请求路由到对应会话的 agent，再把事件经消息总线推回前端。</div><div class="flow-cap" lang="en">The service layer wraps the agent: it routes each request to the right session's agent, then pushes events back to the frontend via the message bus.</div></figure><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">前面几课像在自家厨房做菜；本课是开一家<strong>餐厅</strong>：要同时接待很多客人（多租户）、每桌各点各的（多会话），还要有前台、传菜和后厨调度。</div><div lang="en">Earlier lessons were cooking in your own kitchen; this one opens a <strong>restaurant</strong>: serve many guests at once (multi-tenancy), each table with its own orders (multi-session), plus a front desk, runners and kitchen dispatch.</div></div><h2 lang="zh">create_app</h2><h2 lang="en">create_app</h2><p lang="zh"><code>create_app</code> 需要三个基础设施后端：<strong>存储</strong>（会话/状态持久化）、<strong>消息总线</strong>（事件分发，见下一课）、<strong>工作区管理器</strong>（为每个会话提供隔离的执行环境）。其余都是可选扩展点。</p><p lang="en"><code>create_app</code> takes three infrastructure backends: <strong>storage</strong> (session/state persistence), a <strong>message bus</strong> (event dispatch — next lesson), and a <strong>workspace manager</strong> (an isolated execution environment per session). Everything else is an optional extension point.</p><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.app <span class="kw">import</span> create_app
 <span class="kw">import</span> uvicorn
 
 app = create_app(

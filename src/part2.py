@@ -550,17 +550,21 @@ QUIZZES["07-tools.html"] = [
 
 QUIZZES["08-agents-intro.html"] = [
     (
-        "<code>Agent</code> 的 ReAct（推理-行动）循环，比「把消息直接丢给模型问一次」多了什么？",
-        "What does an <code>Agent</code>'s ReAct (reason-act) loop add over \u201cjust asking the model once\u201d?",
+        "你想先把一段背景资料「喂」给 agent、记进对话历史，但<strong>这一步先别让它回复</strong>。该用哪个方法？",
+        "You want to feed the agent some background and record it in the conversation, but "
+        "<strong>without making it reply yet</strong>. Which method do you use?",
         [
-            ("它会把同一个问题问模型很多遍再取平均",
-             "It asks the model the same question many times and averages the answers", False),
-            ("它只是自动加上系统提示，仍然只调用模型一次",
-             "It just auto-adds the system prompt but still calls the model only once", False),
-            ("它能调用工具、把结果观察回上下文、再据此继续推理，必要时多轮迭代",
-             "It can call tools, observe results back into context, and keep reasoning over multiple rounds as needed", True),
+            ("<code>agent.observe(msgs)</code>——只把消息写入记忆/历史，不触发回复",
+             "<code>agent.observe(msgs)</code> — records messages into memory/history, no reply", True),
+            ("<code>agent.reply(msg)</code>——它会记录消息但不会生成回复",
+             "<code>agent.reply(msg)</code> — it records the message but doesn't generate a reply", False),
+            ("<code>agent.reply_stream(msg)</code>——流式模式下只记录、不回复",
+             "<code>agent.reply_stream(msg)</code> — in streaming mode it only records, no reply", False),
         ],
-        "ReAct 让 agent「想→用工具→观察结果→再想」，根据工具结果决定下一步并可多轮迭代，而不是把问题重复问或只问一次。",
-        "ReAct lets the agent think\u2192use a tool\u2192observe\u2192think again, deciding the next step from tool results across multiple rounds — not repeating the question or asking only once.",
+        "三个方法别混：<code>reply</code> 返回最终 <code>AssistantMsg</code>，<code>reply_stream</code> 流式产出"
+        "事件，<code>observe</code> 则<strong>只把消息并入记忆而不回复</strong>——常用于「先给上下文，稍后再让它答」。",
+        "Don't conflate the three: <code>reply</code> returns the final <code>AssistantMsg</code>, "
+        "<code>reply_stream</code> streams events, and <code>observe</code> <strong>only folds messages "
+        "into memory without replying</strong> — handy to \"give context now, ask later\".",
     ),
 ]

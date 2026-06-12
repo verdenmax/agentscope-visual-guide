@@ -6,7 +6,7 @@ app/message_bus/_base.py, app/_tools/, examples/agent_service).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -19,6 +19,14 @@ LESSON_23 = blocks(
         "Turn a single agent into a deployable <strong>service</strong>: "
         "<code>create_app(...)</code> returns a FastAPI app with built-in multi-tenancy and "
         "multi-session isolation, wiring the agent's event stream to a frontend.",
+    ),
+    flow(
+        [("HTTP 请求", "HTTP request"), ("create_app（FastAPI）", "create_app (FastAPI)"),
+         ("按租户/会话隔离", "Tenant/session isolation"), ("Agent 处理", "Agent runs"),
+         ("事件流", "Event stream"), ("前端", "Frontend")],
+        "服务层在 Agent 外面包了一圈：把请求路由到对应会话的 agent，再把事件经消息总线推回前端。",
+        "The service layer wraps the agent: it routes each request to the right session's agent, "
+        "then pushes events back to the frontend via the message bus.",
     ),
     analogy(
         "前面几课像在自家厨房做菜；本课是开一家<strong>餐厅</strong>：要同时接待很多客人"
@@ -133,6 +141,13 @@ LESSON_24 = blocks(
         "distributed <strong>registry</strong> plus <strong>background-task</strong> tracking "
         "and cross-worker cancellation.",
     ),
+    flow(
+        [("Agent", "Agent"), ("publish 事件", "publish event"), ("MessageBus", "MessageBus"),
+         ("subscribe", "subscribe"), ("前端", "Frontend(s)")],
+        "一次发布可被多个订阅者收到（一对多）；注册表与后台任务追踪也都建在这条总线之上。",
+        "One publish can reach many subscribers (one-to-many); the registry and background-task "
+        "tracking are built on top of this same bus.",
+    ),
     analogy(
         "像一个<strong>广播电台 + 公告栏</strong>：agent 把进展广播出去（publish），前端调台收听"
         "（subscribe）；公告栏（registry）记录「谁在跑什么任务」，任何 worker 都能查到并叫停。",
@@ -216,6 +231,14 @@ LESSON_25 = blocks(
         "<strong>Agent Team</strong> lets a <strong>leader agent</strong> dynamically "
         "<strong>spawn and coordinate</strong> worker agents: it creates teammates, hands out "
         "tasks and gathers results through built-in \"team tools\".",
+    ),
+    flow(
+        [("领导 agent", "Leader"), ("TeamCreate 建队", "TeamCreate"),
+         ("AgentCreate 招募", "AgentCreate"), ("TeamSay 分派", "TeamSay → assign"),
+         ("队员执行", "Workers run"), ("汇总交付", "Aggregate")],
+        "领导不亲自干活，而是用团队工具组队、派活、收集结果——队员本身仍是普通 ReAct agent。",
+        "The leader doesn't do the work; it uses team tools to staff, assign and collect — each "
+        "worker is still an ordinary ReAct agent.",
     ),
     analogy(
         "像一位<strong>项目负责人</strong>：自己不写全部代码，而是按需招募「研究员」「程序员」等"
