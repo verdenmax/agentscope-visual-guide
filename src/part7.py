@@ -41,13 +41,6 @@ LESSON_26 = blocks(
         cap_zh="FunctionTool 从签名+docstring 自动生成 schema；返回 ToolResponse。",
         cap_en="FunctionTool builds the schema from signature+docstring; return a ToolResponse.",
     ),
-    important(
-        "工具的<strong>类型注解</strong>决定参数 schema，<strong>docstring</strong>决定描述——"
-        "它们就是模型看到的「工具说明书」，务必写清楚。",
-        "A tool's <strong>type hints</strong> determine the parameter schema and its "
-        "<strong>docstring</strong> the description — together they are the \"manual\" the model "
-        "reads, so write them clearly.",
-    ),
     h2("方式二：继承 ToolBase", "Option 2: subclass ToolBase"),
     p(
         "需要自定义权限、流式输出或有状态行为时，继承 <code>ToolBase</code>：设置 "
@@ -167,8 +160,8 @@ LESSON_27 = blocks(
          "Subclass <code>MiddlewareBase</code> and implement the <code>on_*</code> hooks you need."),
         ("每个钩子：在 <code>await next_handler(**input_kwargs)</code> 前后插逻辑。",
          "Each hook: insert logic around <code>await next_handler(**input_kwargs)</code>."),
-        ("通过 <code>Agent(middlewares=[...])</code> 挂载，顺序即洋葱层。",
-         "Attach via <code>Agent(middlewares=[...])</code>; order is the onion layering."),
+        ("通过 <code>Agent(middlewares=[...])</code> 挂载；列表顺序决定包裹次序。",
+         "Attach via <code>Agent(middlewares=[...])</code>; list order decides the wrapping order."),
     ]),
 )
 
@@ -232,11 +225,9 @@ LESSON_28 = blocks(
         ")\n\n"
         "async def main():\n"
         '    prompt = UserMsg("Tony", "Create hello.py that prints Hello.")\n'
-        "    answer = []\n"
         "    async for evt in agent.reply_stream(prompt):\n"
         "        if evt.type == EventType.TEXT_BLOCK_DELTA:\n"
         "            print(evt.delta, end=\"\", flush=True)   # stream the text\n"
-        "            answer.append(evt.delta)\n"
         "    print(\"\\n[done]\")\n\n"
         "asyncio.run(main())",
         cap_zh="模型+凭证+工具+中间件，BYPASS 放行，经 reply_stream 流式消费。",

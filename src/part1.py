@@ -7,7 +7,7 @@ AgentScope 2.0 source tree (``src/agentscope/...``).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, steps,
 )
 
 # ---------------------------------------------------------------------------
@@ -162,9 +162,11 @@ LESSON_01 = blocks(
     ),
     h2("最小示例", "Minimal example"),
     p(
-        "下面这段代码就能跑起一个会用工具、并以<strong>事件流</strong>输出的 agent：",
-        "This is enough to run an agent that uses tools and emits an "
-        "<strong>event stream</strong>:",
+        "给模型配上工具，就得到一个能动手的 agent（安装与运行见"
+        "<a href=\"00-setup.html\">第 0 课</a>，流式输出见<a href=\"10-streaming.html\">第 10 课</a>）：",
+        "Give the model some tools and you get an agent that can act (install/run in "
+        "<a href=\"00-setup.html\">lesson 0</a>; streaming in "
+        "<a href=\"10-streaming.html\">lesson 10</a>):",
     ),
     code(
         "from agentscope.agent import Agent\n"
@@ -172,7 +174,6 @@ LESSON_01 = blocks(
         "from agentscope.credential import DashScopeCredential\n"
         "from agentscope.tool import Toolkit, Bash, Read, Write\n"
         "from agentscope.message import UserMsg\n"
-        "from agentscope.event import EventType\n"
         "import os, asyncio\n\n"
         "agent = Agent(\n"
         '    name="Friday",\n'
@@ -185,30 +186,11 @@ LESSON_01 = blocks(
         "    toolkit=Toolkit(tools=[Bash(), Read(), Write()]),\n"
         ")\n\n"
         "async def main():\n"
-        '    async for evt in agent.reply_stream(UserMsg("Tony", "Hi, Friday!")):\n'
-        "        if evt.type == EventType.TEXT_BLOCK_DELTA:\n"
-        "            print(evt.delta, end=\"\", flush=True)\n\n"
+        '    reply = await agent.reply(UserMsg("Tony", "List files here."))\n'
+        "    print(reply)\n\n"
         "asyncio.run(main())",
-        cap_zh="一个会用工具、流式输出事件的 agent。",
-        cap_en="An agent that uses tools and streams events.",
-    ),
-    accordion(
-        "为什么是「事件流」而不是「一句返回」？",
-        "Why an event stream instead of a single return value?",
-        blocks(
-            p(
-                "传统的 <code>response = call(prompt)</code> 只能在<strong>全部算完</strong>后拿到结果。"
-                "但一个 agent 可能要思考、调用多个工具、流式吐字——前端希望<strong>边发生边显示</strong>，"
-                "人类也可能需要在中途<strong>批准某次工具调用</strong>。事件流把这些中间状态都暴露出来。",
-                "A traditional <code>response = call(prompt)</code> only hands you a "
-                "result <strong>after everything finishes</strong>. But an agent may "
-                "think, call several tools, and stream tokens — a UI wants to show "
-                "progress <strong>as it happens</strong>, and a human may need to "
-                "<strong>approve a tool call</strong> mid-flight. The event stream "
-                "exposes all of those intermediate states.",
-            ),
-        ),
-        num=1,
+        cap_zh="模型 + 工具 = 能动手的 agent。",
+        cap_en="Model + tools = an agent that can act.",
     ),
     source_map([
         ("agent/_agent.py",
@@ -322,18 +304,27 @@ LESSON_02 = blocks(
     ),
     h2("它们如何协作", "How they fit together"),
     p(
-        "一次调用里，<code>agent</code> 居中调度：用 <code>credential</code> 配好的 "
-        "<code>model</code> 去推理，把对话历史交给 <code>formatter</code> 整理，"
-        "需要时通过 <code>tool</code>（受 <code>permission</code> 把关、可能在 "
-        "<code>workspace</code> 里执行）行动，整个过程由 <code>event</code> 流向外播报，"
-        "并可被 <code>middleware</code> 拦截增强。",
-        "In a single call, the <code>agent</code> coordinates: it reasons with a "
-        "<code>model</code> configured via <code>credential</code>, hands the dialogue "
-        "history to a <code>formatter</code>, acts through <code>tool</code>s (gated by "
-        "<code>permission</code>, possibly executed inside a <code>workspace</code>) "
-        "when needed, broadcasts the whole process over the <code>event</code> stream, "
-        "and can be intercepted/enhanced by <code>middleware</code>.",
+        "一次调用里，<code>agent</code> 居中调度，按这个顺序串起其余模块：",
+        "In a single call, the <code>agent</code> coordinates, threading the other modules in "
+        "this order:",
     ),
+    steps([
+        ("推理 Reason", "推理 Reason",
+         "用 <code>credential</code> 配好的 <code>model</code> 思考下一步。",
+         "think with a <code>model</code> configured via <code>credential</code>."),
+        ("格式化 Format", "格式化 Format",
+         "把对话历史交给 <code>formatter</code> 转成厂商请求格式。",
+         "hand the dialogue history to a <code>formatter</code> for the vendor's format."),
+        ("行动 Act", "行动 Act",
+         "需要时调用 <code>tool</code>——受 <code>permission</code> 把关，可在 "
+         "<code>workspace</code> 中执行。",
+         "call <code>tool</code>s when needed — gated by <code>permission</code>, run in a "
+         "<code>workspace</code>."),
+        ("播报 Broadcast", "播报 Broadcast",
+         "整个过程由 <code>event</code> 流向外播报，并可被 <code>middleware</code> 拦截增强。",
+         "broadcast the whole process over the <code>event</code> stream, interceptable by "
+         "<code>middleware</code>."),
+    ]),
     source_map([
         ("agent/__init__.py", "<code>Agent</code> 与配置类的入口",
          "entry for <code>Agent</code> and its config classes"),
@@ -378,76 +369,30 @@ LESSON_03 = blocks(
         "finally serves the cup (<code>AssistantMsg</code>).",
     ),
     h2("数据流：从消息到事件", "Data flow: from message to events"),
-    accordion(
-        "① 起步：你发消息并开始消费事件流",
-        "① Start: you send a message and begin consuming the stream",
-        blocks(
-            p(
-                "你构造一条 <code>UserMsg(name, content)</code> 并 <code>async for</code> "
-                "遍历 <code>agent.reply_stream(msg)</code>。Agent 首先发出 "
-                "<code>REPLY_START</code>。",
-                "You build a <code>UserMsg(name, content)</code> and iterate "
-                "<code>agent.reply_stream(msg)</code> with <code>async for</code>. The "
-                "agent first emits <code>REPLY_START</code>.",
-            ),
-        ),
-        num=1,
-    ),
-    accordion(
-        "② 推理：调用模型，流式产出文本 / 思考 / 工具调用",
-        "② Reason: call the model, streaming text / thinking / tool-calls",
-        blocks(
-            p(
-                "Agent 发出 <code>MODEL_CALL_START</code>，随后模型流式返回：文本块"
-                "（<code>TEXT_BLOCK_START/DELTA/END</code>）、思考块"
-                "（<code>THINKING_BLOCK_*</code>）或工具调用（<code>TOOL_CALL_*</code>），"
-                "最后 <code>MODEL_CALL_END</code>。",
-                "The agent emits <code>MODEL_CALL_START</code>, then the model streams "
-                "back: text blocks (<code>TEXT_BLOCK_START/DELTA/END</code>), thinking "
-                "blocks (<code>THINKING_BLOCK_*</code>), or tool calls "
-                "(<code>TOOL_CALL_*</code>), ending with <code>MODEL_CALL_END</code>.",
-            ),
-        ),
-        num=2,
-    ),
-    accordion(
-        "③ 行动：执行工具（可能需要权限确认）",
-        "③ Act: execute tools (possibly needing permission)",
-        blocks(
-            p(
-                "若模型请求了工具，Agent 执行它们并产出 "
-                "<code>TOOL_RESULT_START</code> → <code>TOOL_RESULT_TEXT_DELTA</code> / "
-                "<code>TOOL_RESULT_DATA_DELTA</code> → <code>TOOL_RESULT_END</code>。"
-                "若该工具受权限管控，会先发出 <code>REQUIRE_USER_CONFIRM</code> 等待批准。",
-                "If the model requested tools, the agent runs them and emits "
-                "<code>TOOL_RESULT_START</code> → <code>TOOL_RESULT_TEXT_DELTA</code> / "
-                "<code>TOOL_RESULT_DATA_DELTA</code> → <code>TOOL_RESULT_END</code>. If a "
-                "tool is permission-gated, it first emits "
-                "<code>REQUIRE_USER_CONFIRM</code> and waits for approval.",
-            ),
-        ),
-        num=3,
-    ),
-    accordion(
-        "④ 循环与收尾",
-        "④ Loop and finish",
-        blocks(
-            p(
-                "推理 → 行动会循环进行，直到模型给出最终答案，Agent 发出 "
-                "<code>REPLY_END</code>（仅标志本次回复结束，携带 <code>reply_id</code>，"
-                "<strong>不</strong>携带最终消息）；若超过最大轮数则发出 "
-                "<code>EXCEED_MAX_ITERS</code>。最终的 <code>AssistantMsg</code> 通过 "
-                "<code>agent.reply(...)</code> 获取，或由流式文本块自行累积。",
-                "Reason → act repeats until the model produces a final answer and the "
-                "agent emits <code>REPLY_END</code> (which only signals the reply is "
-                "complete and carries a <code>reply_id</code> — it does <strong>not</strong> "
-                "carry the final message); if it exceeds the iteration cap it emits "
-                "<code>EXCEED_MAX_ITERS</code>. Obtain the final <code>AssistantMsg</code> "
-                "via <code>agent.reply(...)</code> or by accumulating the streamed text blocks.",
-            ),
-        ),
-        num=4,
-    ),
+    steps([
+        ("起步", "Start",
+         "你构造一条 <code>UserMsg(name, content)</code>，用 <code>async for</code> 遍历 "
+         "<code>agent.reply_stream(msg)</code>；回复开始。",
+         "You build a <code>UserMsg(name, content)</code> and iterate "
+         "<code>agent.reply_stream(msg)</code> with <code>async for</code>; the reply begins."),
+        ("推理 Reason",
+         "推理 Reason",
+         "Agent 调用模型，流式产出<strong>文本 / 思考</strong>，或决定<strong>调用工具</strong>。",
+         "The agent calls the model, streaming <strong>text / thinking</strong> or deciding to "
+         "<strong>call tools</strong>."),
+        ("行动 Act", "行动 Act",
+         "若模型请求了工具，Agent 执行它们并把结果<strong>观察</strong>回上下文；"
+         "受管控的工具会先<strong>暂停等待权限确认</strong>（第 16 课）。",
+         "If the model requested tools, the agent runs them and <strong>observes</strong> the "
+         "results back into context; gated tools first <strong>pause for permission</strong> "
+         "(lesson 16)."),
+        ("循环与收尾", "Loop & finish",
+         "推理 → 行动循环往复，直到模型给出最终答案，回复结束。"
+         "（事件的细节与命名见<a href=\"09-event-system.html\">第 9 课</a>。）",
+         "Reason → act repeats until the model gives a final answer and the reply ends. "
+         "(The events and their names are detailed in "
+         "<a href=\"09-event-system.html\">lesson 9</a>.)"),
+    ]),
     h2("消费事件流", "Consuming the stream"),
     code(
         "from agentscope.event import EventType\n\n"

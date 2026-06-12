@@ -163,6 +163,17 @@ pre.code .nu { color: #f78c6c; }
 .acc-body { padding: .9rem 1.1rem 1.1rem; }
 .acc-body pre.code { font-size: .78rem; }
 
+/* ---- numbered steps (visible process flow) ---- */
+.steps { margin: 1.3rem 0; }
+.step { display: flex; gap: .9rem; position: relative; padding-bottom: 1.1rem; }
+.step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
+  top: 34px; bottom: -2px; width: 2px; background: var(--line); }
+.step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
+.step-t { font-weight: 700; margin: .3rem 0 .2rem; }
+.step-b { color: var(--muted); font-size: .95rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;

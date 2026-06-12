@@ -133,11 +133,11 @@ LESSON_10 = blocks(
         "practical pattern for consuming the stream.",
     ),
     analogy(
-        "像看<strong>直播弹幕</strong>：消息一条条到，你按类型决定怎么显示——文字追加到气泡里，"
-        "工具调用显示成一张卡片，确认请求弹出一个按钮。",
-        "Like watching a <strong>live feed</strong>: messages arrive one by one and you decide "
-        "how to show each by type — text appended to a bubble, a tool call rendered as a card, "
-        "a confirm request popping a button.",
+        "重点在<strong>「按类型分别渲染」</strong>：同一条流里，文字增量追加进气泡、工具调用画成一张卡片、"
+        "确认请求弹出一个按钮——你的代码用 <code>match evt.type</code> 决定每种怎么处理。",
+        "The point is <strong>rendering each type differently</strong>: in one stream, text deltas "
+        "append into a bubble, a tool call becomes a card, a confirm request pops a button — your "
+        "code uses <code>match evt.type</code> to decide how to handle each.",
     ),
     h2("基本消费模式", "The basic consumption pattern"),
     code(
@@ -196,12 +196,6 @@ LESSON_10 = blocks(
             ),
         ),
         num=1,
-    ),
-    important(
-        "<code>reply_stream</code> 必须用 <code>async for</code> 在异步函数里消费；它不是普通"
-        "可迭代对象，也不会「一次性返回全部」。",
-        "<code>reply_stream</code> must be consumed with <code>async for</code> inside an async "
-        "function; it is not a plain iterable and does not return everything at once.",
     ),
     source_map([
         ("agent/_agent.py",

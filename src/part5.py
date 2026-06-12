@@ -37,14 +37,12 @@ LESSON_16 = blocks(
              ("对每次调用作出裁决", "renders a decision per call")],
             [("<code>PermissionRule</code>", "<code>PermissionRule</code>"),
              ("匹配工具 / 参数的规则", "rules matching tools / arguments")],
-            [("<code>PermissionMode</code> / <code>PermissionBehavior</code>",
-              "<code>PermissionMode</code> / <code>PermissionBehavior</code>"),
-             ("总体模式（含 bypass）与默认行为", "overall mode (incl. bypass) + default behavior")],
+            [("<code>PermissionMode</code>", "<code>PermissionMode</code>"),
+             ("总体模式（如默认询问、bypass 放行）", "the overall mode (e.g. default-ask, bypass)")],
             [("<code>PermissionDecision</code>", "<code>PermissionDecision</code>"),
              ("放行 / 拒绝 / 需确认", "allow / deny / needs-confirm")],
             [("<code>PermissionContext</code>", "<code>PermissionContext</code>"),
-             ("上下文（如附加工作目录 <code>AdditionalWorkingDirectory</code>）",
-              "context (e.g. <code>AdditionalWorkingDirectory</code>)")],
+             ("承载模式与规则的上下文", "the context holding the mode and rules")],
         ],
     ),
     p(
@@ -97,10 +95,9 @@ LESSON_16 = blocks(
         cap_en="Unattended: BYPASS skips confirmation (only when it's safe).",
     ),
     note(
-        "模式还有 <code>ACCEPT_EDITS</code>（自动允许工作目录内的读写）、<code>EXPLORE</code>、"
-        "<code>DONT_ASK</code> 等，适配不同信任级别。",
-        "Other modes include <code>ACCEPT_EDITS</code> (auto-allow reads/writes inside working "
-        "directories), <code>EXPLORE</code> and <code>DONT_ASK</code>, for different trust levels.",
+        "其他模式中最实用的是 <code>ACCEPT_EDITS</code>（自动允许工作目录内的读写，适合开发期快速迭代）。",
+        "Among the other modes, the practical one is <code>ACCEPT_EDITS</code> (auto-allow "
+        "reads/writes inside working directories — handy for rapid development).",
     ),
     source_map([
         ("permission/_engine.py", "<code>PermissionEngine</code>",
@@ -156,6 +153,16 @@ LESSON_17 = blocks(
             [("<code>E2BWorkspace</code>", "<code>E2BWorkspace</code>"),
              ("云端沙箱，弹性 / 强隔离", "cloud sandbox, elastic / strong isolation")],
         ],
+    ),
+    code(
+        "from agentscope.agent import Agent\n"
+        "from agentscope.workspace import DockerWorkspace\n\n"
+        "agent = Agent(\n"
+        '    name="Friday", system_prompt="...", model=..., toolkit=...,\n'
+        "    offloader=DockerWorkspace(...),  # tools/code run inside the sandbox\n"
+        ")",
+        cap_zh="把一个 workspace 交给 Agent，工具/代码即在隔离环境中执行。",
+        cap_en="Hand a workspace to the Agent; tools/code then run in the sandbox.",
     ),
     accordion(
         "Offloader 解决什么？",
@@ -286,11 +293,13 @@ LESSON_19 = blocks(
     ),
     p(
         "在服务化场景（第 23 课），每个会话有自己的状态，由存储后端持久化，从而实现"
-        "「多会话隔离」与「断点续聊」。<code>TaskContext</code> 则承载与某个 <code>Task</code> "
-        "相关的运行上下文。",
+        "「多会话隔离」与「断点续聊」。<code>TaskContext</code> 是 <code>AgentState</code> 里"
+        "专门存放<strong>任务清单</strong>的那部分（即下文规划工具读写的 <code>tasks_context</code>）。",
         "In the service setting (lesson 23) each session has its own state, persisted by the "
         "storage backend — enabling \"multi-session isolation\" and \"resume a conversation\". "
-        "<code>TaskContext</code> carries the runtime context tied to a given <code>Task</code>.",
+        "<code>TaskContext</code> is the part of <code>AgentState</code> that holds the "
+        "<strong>task list</strong> (the <code>tasks_context</code> the planning tools below "
+        "read and write).",
     ),
     h2("任务规划工具", "Task-planning tools"),
     p(
@@ -377,11 +386,15 @@ LESSON_20 = blocks(
         cap_en="Load skills via the Toolkit's skills_or_loaders.",
     ),
     p(
-        "<code>Toolkit</code> 会汇集已注册技能的说明（instructions）提供给 agent；内置的 skill 工具"
-        "（<code>tool/_builtin/_skill.py</code>）让 agent 能在运行时使用技能。",
-        "The <code>Toolkit</code> gathers the instructions of registered skills for the agent; "
-        "the built-in skill tool (<code>tool/_builtin/_skill.py</code>) lets the agent use "
-        "skills at runtime.",
+        "一个 <code>Skill</code> 本质上就是一个<strong>目录 + 一份 Markdown 文档</strong>："
+        "带有 <code>name</code>、<code>description</code> 和 <code>markdown</code>（具体做法），"
+        "放在某个目录（<code>dir</code>）下。<code>Toolkit</code> 把已注册技能的说明汇集给 agent，"
+        "内置的 skill 工具让 agent 在运行时按需调用——所以「写一个技能」≈ 写一份结构化的操作手册。",
+        "A <code>Skill</code> is essentially a <strong>directory + a Markdown document</strong>: "
+        "it has a <code>name</code>, a <code>description</code>, and the <code>markdown</code> "
+        "(the actual how-to), living under a <code>dir</code>. The <code>Toolkit</code> surfaces "
+        "registered skills' instructions to the agent, and the built-in skill tool lets the agent "
+        "invoke them at runtime — so \"writing a skill\" ≈ writing a structured playbook.",
     ),
     source_map([
         ("skill/_base.py", "<code>Skill</code> / <code>SkillLoaderBase</code>",
@@ -514,8 +527,9 @@ LESSON_22 = blocks(
          "<code>TTSModelBase</code> unifies text-to-speech, including a realtime mode."),
         ("<code>TTSMiddleware</code> 让语音能力即插即用。",
          "<code>TTSMiddleware</code> makes speech plug-and-play."),
-        ("再次体现「用中间件扩展，不改主逻辑」。",
-         "Again: \"extend via middleware, don't touch the core\"."),
+        ("一次性合成用 <code>DashScopeTTSModel</code>，低延迟流式用 <code>DashScopeRealtimeTTSModel</code>。",
+         "Use <code>DashScopeTTSModel</code> for one-shot synthesis, "
+         "<code>DashScopeRealtimeTTSModel</code> for low-latency streaming."),
     ]),
 )
 

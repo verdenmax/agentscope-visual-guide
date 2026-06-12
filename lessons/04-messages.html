@@ -141,6 +141,17 @@ pre.code .nu { color: #f78c6c; }
 .acc-body { padding: .9rem 1.1rem 1.1rem; }
 .acc-body pre.code { font-size: .78rem; }
 
+/* ---- numbered steps (visible process flow) ---- */
+.steps { margin: 1.3rem 0; }
+.step { display: flex; gap: .9rem; position: relative; padding-bottom: 1.1rem; }
+.step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
+  top: 34px; bottom: -2px; width: 2px; background: var(--line); }
+.step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
+.step-t { font-weight: 700; margin: .3rem 0 .2rem; }
+.step-b { color: var(--muted); font-size: .95rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;
@@ -215,7 +226,7 @@ table.t tr:last-child td { border-bottom: none; }
 <div class="part"><span lang="zh">第二部分 · 用户视角</span><span lang="en">Part 2 · User&#x27;s View</span></div>
 <h1><span lang="zh">消息系统</span><span lang="en">Messages</span></h1>
 </div>
-<p class="lead" lang="zh">AgentScope 用结构化的<strong>消息对象</strong>承载对话。一条 <code>Msg</code> 记录「谁说的」（name + role）和「说了什么」——而内容是一个<strong>内容块列表</strong>，可以是文本、思考、工具调用、工具结果或多模态数据。</p><p class="lead" lang="en">AgentScope carries dialogue in structured <strong>message objects</strong>. A <code>Msg</code> records "who spoke" (name + role) and "what was said" — where the content is a <strong>list of content blocks</strong>: text, thinking, tool calls, tool results, or multimodal data.</p><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">把 <code>Msg</code> 想成一个<strong>信封</strong>：信封上写着寄件人与身份（name/role），里面可以装好几张<strong>卡片</strong>（内容块）——一张是文字，一张是图片，一张是「我要调用某工具」的请求。</div><div lang="en">Think of a <code>Msg</code> as an <strong>envelope</strong>: the outside shows the sender and role (name/role), and inside are several <strong>cards</strong> (content blocks) — one text, one image, one "please call this tool" request.</div></div><h2 lang="zh">消息家族</h2><h2 lang="en">The message family</h2><p lang="zh"><code>Msg</code> 是核心数据类。<code>UserMsg</code>、<code>AssistantMsg</code>、<code>SystemMsg</code> 是<strong>工厂函数</strong>，分别构造带固定 role 的 <code>Msg</code>（不是子类）。</p><p lang="en"><code>Msg</code> is the core data class. <code>UserMsg</code>, <code>AssistantMsg</code> and <code>SystemMsg</code> are <strong>factory functions</strong> that each build a <code>Msg</code> with a fixed role (they are not subclasses).</p><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.message <span class="kw">import</span> UserMsg, AssistantMsg, SystemMsg
+<p class="lead" lang="zh">AgentScope 用结构化的<strong>消息对象</strong>承载对话。一条 <code>Msg</code> 记录「谁说的」（name + role）和「说了什么」——内容是一个<strong>内容块列表</strong>（下表详列各类型）。</p><p class="lead" lang="en">AgentScope carries dialogue in structured <strong>message objects</strong>. A <code>Msg</code> records "who spoke" (name + role) and "what was said" — the content is a <strong>list of content blocks</strong> (the table below lists the types).</p><div class="card analogy"><div class="tag"><span lang="zh">🧩 生活类比</span><span lang="en">🧩 Analogy</span></div><div lang="zh">把 <code>Msg</code> 想成一个<strong>信封</strong>：信封上写着寄件人与身份（name/role），里面可以装好几张<strong>卡片</strong>（内容块）——一张是文字，一张是图片，一张是「我要调用某工具」的请求。</div><div lang="en">Think of a <code>Msg</code> as an <strong>envelope</strong>: the outside shows the sender and role (name/role), and inside are several <strong>cards</strong> (content blocks) — one text, one image, one "please call this tool" request.</div></div><h2 lang="zh">消息家族</h2><h2 lang="en">The message family</h2><p lang="zh"><code>Msg</code> 是核心数据类。<code>UserMsg</code>、<code>AssistantMsg</code>、<code>SystemMsg</code> 是<strong>工厂函数</strong>，分别构造带固定 role 的 <code>Msg</code>（不是子类）。</p><p lang="en"><code>Msg</code> is the core data class. <code>UserMsg</code>, <code>AssistantMsg</code> and <code>SystemMsg</code> are <strong>factory functions</strong> that each build a <code>Msg</code> with a fixed role (they are not subclasses).</p><figure class="code-fig"><pre class="code" data-lang="python"><span class="kw">from</span> agentscope.message <span class="kw">import</span> UserMsg, AssistantMsg, SystemMsg
 
 sys = SystemMsg(<span class="st">&quot;system&quot;</span>, <span class="st">&quot;You are helpful.&quot;</span>)
 user = UserMsg(<span class="st">&quot;Tony&quot;</span>, <span class="st">&quot;Hello!&quot;</span>)          <span class="cm"># role = user</span>

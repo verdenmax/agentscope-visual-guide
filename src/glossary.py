@@ -236,6 +236,13 @@ _ROWS = [
      ('<a href="16-permission.html">第16课</a>',
       '<a href="16-permission.html">Lesson 16</a>')],
 
+    [("<code>PermissionContext</code>", "<code>PermissionContext</code>"),
+     ("承载权限模式与规则的上下文；存于 <code>AgentState</code>（设 bypass 模式即在此）。",
+      "The context holding the permission mode and rules; lives on "
+      "<code>AgentState</code> (set bypass mode here)."),
+     ('<a href="16-permission.html">第16课</a>',
+      '<a href="16-permission.html">Lesson 16</a>')],
+
     [("<code>PermissionMode</code>", "<code>PermissionMode</code>"),
      ("枚举，选择整体权限策略（如默认/最严格等模式）。",
       "An enum selecting the overall permission strategy (e.g. default / "
@@ -281,6 +288,22 @@ _ROWS = [
       "A reusable blueprint for creating sub-agents within a team."),
      ('<a href="25-agent-team.html">第25课</a>',
       '<a href="25-agent-team.html">Lesson 25</a>')],
+
+    [("团队工具 <code>TeamCreate/AgentCreate/TeamSay/TeamDelete</code>",
+      "Team tools <code>TeamCreate/AgentCreate/TeamSay/TeamDelete</code>"),
+     ("领导 agent 用来组队的内置工具：建队、按模板生成队员、向队员发消息、解散。",
+      "Built-in tools a leader agent uses to form a team: create a team, spawn a "
+      "worker from a template, message a teammate, disband."),
+     ('<a href="25-agent-team.html">第25课</a>',
+      '<a href="25-agent-team.html">Lesson 25</a>')],
+
+    [("<code>AgentOrientedException</code> / <code>DeveloperOrientedException</code>",
+      "<code>AgentOrientedException</code> / <code>DeveloperOrientedException</code>"),
+     ("工具错误的两种基类：前者回喂给模型让其自纠，后者抛给开发者。",
+      "The two tool-error base classes: the former is fed back to the model to "
+      "self-correct; the latter propagates to the developer."),
+     ('<a href="26-custom-tools.html">第26课</a>',
+      '<a href="26-custom-tools.html">Lesson 26</a>')],
 
     [("<code>SystemMsg</code>", "<code>SystemMsg</code>"),
      ("工厂函数，创建 <code>role=\"system\"</code> 的 <code>Msg</code>。",

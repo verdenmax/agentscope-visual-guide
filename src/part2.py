@@ -15,12 +15,11 @@ from i18n import (
 LESSON_04 = blocks(
     lead(
         "AgentScope 用结构化的<strong>消息对象</strong>承载对话。一条 <code>Msg</code> 记录"
-        "「谁说的」（name + role）和「说了什么」——而内容是一个<strong>内容块列表</strong>，"
-        "可以是文本、思考、工具调用、工具结果或多模态数据。",
+        "「谁说的」（name + role）和「说了什么」——内容是一个<strong>内容块列表</strong>"
+        "（下表详列各类型）。",
         "AgentScope carries dialogue in structured <strong>message objects</strong>. A "
-        "<code>Msg</code> records \"who spoke\" (name + role) and \"what was said\" — where "
-        "the content is a <strong>list of content blocks</strong>: text, thinking, tool calls, "
-        "tool results, or multimodal data.",
+        "<code>Msg</code> records \"who spoke\" (name + role) and \"what was said\" — the "
+        "content is a <strong>list of content blocks</strong> (the table below lists the types).",
     ),
     analogy(
         "把 <code>Msg</code> 想成一个<strong>信封</strong>：信封上写着寄件人与身份（name/role），"
@@ -115,7 +114,7 @@ LESSON_05 = blocks(
     ),
     h2("支持的厂商", "Supported vendors"),
     table(
-        [("厂商 / Vendor", "厂商 / Vendor"), ("类 / Class", "类 / Class")],
+        [("厂商", "Vendor"), ("类", "Class")],
         [
             [("DashScope（通义千问）", "DashScope (Qwen)"),
              ("<code>DashScopeChatModel</code>", "<code>DashScopeChatModel</code>")],
@@ -322,12 +321,14 @@ LESSON_07 = blocks(
          "<code>Edit</code>/<code>Grep</code>/<code>Glob</code>"),
     ]),
     keypoints([
-        ("<code>Toolkit</code> 注册并管理工具，自动生成 JSON schema。",
-         "<code>Toolkit</code> registers/manages tools and auto-generates JSON schemas."),
+        ("<code>Toolkit</code> 注册管理工具，并自动从签名 + docstring 生成 JSON schema。",
+         "<code>Toolkit</code> registers tools and auto-generates JSON schemas from "
+         "signature + docstring."),
         ("内置工具：<code>Bash/Read/Write/Edit/Grep/Glob</code>。",
          "Built-ins: <code>Bash/Read/Write/Edit/Grep/Glob</code>."),
-        ("<code>FunctionTool</code> 把函数的签名 + docstring 变成工具说明。",
-         "<code>FunctionTool</code> turns a function's signature + docstring into its tool spec."),
+        ("模型选定后，<code>Toolkit</code> 负责实际执行对应工具并回收结果。",
+         "Once the model chooses, the <code>Toolkit</code> executes the tool and collects "
+         "the result."),
     ]),
 )
 
@@ -412,12 +413,6 @@ LESSON_08 = blocks(
          "<code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code>",
          "<code>ContextConfig</code> / <code>ModelConfig</code> / <code>ReActConfig</code>"),
     ]),
-    highlight(
-        "Agent 不靠死板脚本，而是把模型放进一个「想—做—再想」的循环里，并用工具与事件让它"
-        "<strong>真正能干活、且过程可见</strong>。",
-        "The Agent doesn't rely on a rigid script; it places the model in a think-act-think "
-        "loop and uses tools + events to make it <strong>actually capable and observable</strong>.",
-    ),
     keypoints([
         ("<code>Agent</code> = name + system_prompt + model + toolkit。",
          "<code>Agent</code> = name + system_prompt + model + toolkit."),

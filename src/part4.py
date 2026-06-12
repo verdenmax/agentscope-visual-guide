@@ -6,7 +6,7 @@ model/_base.py, model/_model_response.py, middleware/_base.py and impls).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, steps,
 )
 
 # ---------------------------------------------------------------------------
@@ -30,44 +30,26 @@ LESSON_12 = blocks(
         "and the finished product (reply) rolls off.",
     ),
     h2("循环的骨架", "The loop's skeleton"),
-    accordion(
-        "① reasoning（推理）",
-        "① reasoning",
-        blocks(p(
-            "Agent 调用模型，得到下一步意图：要么继续输出文本（最终答案的雏形），"
-            "要么产出一个或多个<strong>工具调用</strong>。",
-            "The agent calls the model to get the next intent: either keep producing text (the "
-            "beginnings of a final answer) or emit one or more <strong>tool calls</strong>.",
-        )),
-        num=1,
-    ),
-    accordion(
-        "② acting（行动）",
-        "② acting",
-        blocks(p(
-            "若有工具调用，Agent 通过 <code>Toolkit</code> 执行它们；执行前 "
-            "<code>PermissionEngine</code> 判定是否放行（可能触发 "
-            "<code>REQUIRE_USER_CONFIRM</code> 事件等待人类批准）。",
-            "If there are tool calls, the agent runs them via the <code>Toolkit</code>; before "
-            "execution the <code>PermissionEngine</code> decides whether to allow them (possibly "
-            "raising a <code>REQUIRE_USER_CONFIRM</code> event to wait for a human).",
-        )),
-        num=2,
-    ),
-    accordion(
-        "③ 循环 / 收尾",
-        "③ loop / finish",
-        blocks(p(
-            "工具结果被「观察」回上下文，循环回到推理；如此往复直到模型给出最终答案"
-            "（或触发 <code>EXCEED_MAX_ITERS</code>）。必要时 <code>compress_context</code> 压缩历史，"
-            "<code>offloader</code> 卸载超长内容。",
-            "Tool results are \"observed\" back into context and the loop returns to reasoning, "
-            "repeating until the model produces a final answer (or hits "
-            "<code>EXCEED_MAX_ITERS</code>). When needed, <code>compress_context</code> shrinks "
-            "history and the <code>offloader</code> offloads oversized content.",
-        )),
-        num=3,
-    ),
+    steps([
+        ("reasoning（推理）", "reasoning",
+         "Agent 调用模型，得到下一步意图：要么继续输出文本（最终答案的雏形），"
+         "要么产出一个或多个<strong>工具调用</strong>。",
+         "The agent calls the model for the next intent: keep producing text (the beginnings of "
+         "a final answer), or emit one or more <strong>tool calls</strong>."),
+        ("acting（行动）", "acting",
+         "若有工具调用，Agent 通过 <code>Toolkit</code> 执行它们；执行前 "
+         "<code>PermissionEngine</code> 判定是否放行（可能触发 "
+         "<code>REQUIRE_USER_CONFIRM</code> 等待人类批准）。",
+         "If there are tool calls, the agent runs them via the <code>Toolkit</code>; first the "
+         "<code>PermissionEngine</code> decides whether to allow them (possibly raising "
+         "<code>REQUIRE_USER_CONFIRM</code> to wait for a human)."),
+        ("循环 / 收尾", "loop / finish",
+         "工具结果被「观察」回上下文，循环回到推理，直到模型给出最终答案。必要时 "
+         "<code>compress_context</code> 压缩历史、<code>offloader</code> 卸载超长内容。",
+         "Tool results are \"observed\" back into context and the loop returns to reasoning, "
+         "until the model gives a final answer. When needed, <code>compress_context</code> "
+         "shrinks history and the <code>offloader</code> offloads oversized content."),
+    ]),
     h2("中间件链", "The middleware chain"),
     p(
         "每个阶段（reply / reasoning / acting / model call / system prompt）都被实现成一条"
@@ -119,17 +101,15 @@ LESSON_13 = blocks(
     code(
         "# 1) 取所有工具的 JSON schema（异步！交给模型）\n"
         "schemas = await toolkit.get_tool_schemas()\n\n"
-        "# 2) 模型选定后，按名字执行（call_tool 是 async generator，需要 state）\n"
+        "# 2) 模型选定后，按名字执行（call_tool 是 async generator，需要 state；AgentState 见第 19 课）\n"
         "async for chunk in toolkit.call_tool(tool_call, state):\n"
         "    ...   # 流式 ToolChunk，最后是完整的 ToolResponse / streamed, then final ToolResponse",
         cap_zh="get_tool_schemas 是 async；call_tool 是 async generator（带 state）。",
         cap_en="get_tool_schemas is async; call_tool is an async generator (takes state).",
     ),
     important(
-        "<code>get_tool_schemas</code> 是<strong>异步</strong>方法（取代了旧版的同步 "
-        "<code>get_function_schemas</code>）；务必 <code>await</code>。",
-        "<code>get_tool_schemas</code> is <strong>async</strong> (it replaced the older "
-        "synchronous <code>get_function_schemas</code>); be sure to <code>await</code> it.",
+        "<code>get_tool_schemas</code> 是<strong>异步</strong>方法，务必 <code>await</code>。",
+        "<code>get_tool_schemas</code> is <strong>async</strong> — be sure to <code>await</code> it.",
     ),
     h2("分组与适配器", "Groups and adapters"),
     p(
@@ -190,8 +170,6 @@ LESSON_14 = blocks(
              ("输入 / 输出 token 等用量", "input / output token usage")],
             [("<code>StructuredResponse</code>", "<code>StructuredResponse</code>"),
              ("需要结构化（schema 化）输出时使用", "for structured (schema'd) output")],
-            [("<code>ModelCard</code>", "<code>ModelCard</code>"),
-             ("模型能力元信息", "model capability metadata")],
         ],
     ),
     p(

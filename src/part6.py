@@ -104,11 +104,11 @@ LESSON_23 = blocks(
         "(<code>examples/web_ui</code>) needs Node ≥ 20.",
     ),
     highlight(
-        "工作区后端可在本地/Docker/E2B 间切换；而 storage 与 message bus 即使在开发期"
-        "<strong>也需要 Redis</strong>。接口是统一的，未来可扩展其他实现。",
-        "The workspace backend can switch between local/Docker/E2B; storage and the message bus, "
-        "however, <strong>require Redis even in development</strong>. The interfaces are uniform, "
-        "leaving room for other implementations later.",
+        "三大后端都是<strong>统一接口</strong>：工作区已有本地/Docker/E2B 多种实现，存储与消息总线"
+        "目前只有 Redis 实现——接口留出了扩展空间，未来可接入更多后端。",
+        "All three backends sit behind <strong>uniform interfaces</strong>: the workspace already "
+        "has local/Docker/E2B implementations, while storage and the message bus ship only Redis "
+        "today — the interfaces leave room to plug in more backends later.",
     ),
     keypoints([
         ("<code>create_app</code> 返回标准 FastAPI 应用，可独立运行或挂载。",
@@ -179,11 +179,11 @@ LESSON_24 = blocks(
         cap_en="Publish/subscribe + registry primitives (all async).",
     ),
     note(
-        "<code>RedisMessageBus</code> 是面向多进程 / 分布式部署的实现；本地或单进程场景可用更轻量的"
-        "实现。接口一致，可直接替换。",
-        "<code>RedisMessageBus</code> is the implementation for multi-process / distributed "
-        "deployments; lighter implementations suit local or single-process use. The interface "
-        "is the same, so they're drop-in swappable.",
+        "目前只提供 <code>RedisMessageBus</code> 这一实现（面向多进程 / 分布式部署）。"
+        "<code>MessageBus</code> 是统一接口，未来可据此接入更轻量（本地 / 单进程）的实现。",
+        "Only the <code>RedisMessageBus</code> implementation ships today (for multi-process / "
+        "distributed deployments). <code>MessageBus</code> is the uniform interface, designed so "
+        "lighter (local / single-process) buses can be added later.",
     ),
     source_map([
         ("app/message_bus/_base.py",
@@ -201,8 +201,8 @@ LESSON_24 = blocks(
          "The bus = <strong>pub/sub + registry + background tasks/cancel</strong>."),
         ("它支撑后台任务卸载与跨 worker 取消等分布式能力。",
          "It powers distributed features like background-task offloading and cross-worker cancel."),
-        ("<code>RedisMessageBus</code> 用于分布式；接口统一、可替换。",
-         "<code>RedisMessageBus</code> targets distributed setups; the interface is uniform and swappable."),
+        ("目前仅 <code>RedisMessageBus</code> 一种实现；接口统一，未来可扩展。",
+         "Only <code>RedisMessageBus</code> ships today; the interface is uniform and extensible."),
     ]),
 )
 

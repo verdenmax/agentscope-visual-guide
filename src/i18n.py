@@ -15,7 +15,7 @@ import tokenize
 __all__ = [
     "esc", "t", "lead", "p", "h2", "h3", "card", "table", "code",
     "accordion", "keypoints", "source_map", "analogy", "note", "tip",
-    "important", "highlight", "blocks",
+    "important", "highlight", "blocks", "steps",
 ]
 
 
@@ -174,6 +174,22 @@ def keypoints(
         f'<div class="keypoints"><div class="kp-title">'
         f"{t(title_zh, title_en)}</div><ul>{lis}</ul></div>"
     )
+
+
+def steps(items: list) -> str:
+    """Always-visible numbered steps for a process/flow.
+
+    ``items``: list[(zh_title, en_title, zh_body, en_body)]. Use this for core
+    sequences (e.g. a lifecycle or loop) instead of collapsed accordions.
+    """
+    out = []
+    for i, (zt, et, zb, eb) in enumerate(items, 1):
+        out.append(
+            f'<div class="step"><div class="step-n">{i}</div>'
+            f'<div class="step-c"><div class="step-t">{t(zt, et)}</div>'
+            f'<div class="step-b">{t(zb, eb)}</div></div></div>'
+        )
+    return f'<div class="steps">{"".join(out)}</div>'
 
 
 def source_map(

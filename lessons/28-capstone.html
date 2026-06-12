@@ -141,6 +141,17 @@ pre.code .nu { color: #f78c6c; }
 .acc-body { padding: .9rem 1.1rem 1.1rem; }
 .acc-body pre.code { font-size: .78rem; }
 
+/* ---- numbered steps (visible process flow) ---- */
+.steps { margin: 1.3rem 0; }
+.step { display: flex; gap: .9rem; position: relative; padding-bottom: 1.1rem; }
+.step:not(:last-child)::before { content: ""; position: absolute; left: 15px;
+  top: 34px; bottom: -2px; width: 2px; background: var(--line); }
+.step-n { width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem; flex-shrink: 0; z-index: 1; }
+.step-t { font-weight: 700; margin: .3rem 0 .2rem; }
+.step-b { color: var(--muted); font-size: .95rem; }
+
 /* ---- keypoints + source map ---- */
 .keypoints { background: var(--accent-soft); border: 1px solid var(--line);
   border-left: 4px solid var(--accent); border-radius: 12px; padding: .9rem 1.1rem;
@@ -249,11 +260,9 @@ agent = Agent(
 
 <span class="kw">async</span> <span class="kw">def</span> main():
     prompt = UserMsg(<span class="st">&quot;Tony&quot;</span>, <span class="st">&quot;Create hello.py that prints Hello.&quot;</span>)
-    answer = []
     <span class="kw">async</span> <span class="kw">for</span> evt <span class="kw">in</span> agent.reply_stream(prompt):
         <span class="kw">if</span> evt.<span class="kw">type</span> == EventType.TEXT_BLOCK_DELTA:
             print(evt.delta, end=<span class="st">&quot;&quot;</span>, flush=<span class="kw">True</span>)   <span class="cm"># stream the text</span>
-            answer.append(evt.delta)
     print(<span class="st">&quot;\n[done]&quot;</span>)
 
 asyncio.run(main())</pre><div class="code-cap" lang="zh">模型+凭证+工具+中间件，BYPASS 放行，经 reply_stream 流式消费。</div><div class="code-cap" lang="en">Model+credential+tools+middleware, BYPASS-allowed, streamed via reply_stream.</div></figure><details class="accordion"><summary><span class="badge-num">1</span><span lang="zh">把它升级成服务</span><span lang="en">Leveling it up to a service</span> <span class="hint"><span lang="zh">点击展开</span><span lang="en">expand</span></span></summary><div class="acc-body"><p lang="zh">当你要对外提供多用户、多会话的能力时，用 <a href="23-agent-service.html">create_app</a> 把它包成 FastAPI 服务，用 <a href="24-message-bus.html">消息总线</a> 把事件推给前端，甚至用 <a href="25-agent-team.html">Agent Team</a> 让一个领导 agent 协调多个工作 agent。</p><p lang="en">When you need multi-user, multi-session capability, wrap it as a FastAPI service with <a href="23-agent-service.html">create_app</a>, push events to the frontend over the <a href="24-message-bus.html">message bus</a>, and even let a leader agent coordinate workers with <a href="25-agent-team.html">Agent Team</a>.</p></div></details><div class="srcmap"><div class="kp-title"><span lang="zh">🔬 源码对应</span><span lang="en">🔬 Source mapping</span></div><table class="t"><tr><td><code>agent/_agent.py</code></td><td><span lang="zh">把一切编排起来的 <code>Agent</code></span><span lang="en">the <code>Agent</code> that orchestrates everything</span></td></tr><tr><td><code>examples/agent_service</code></td><td><span lang="zh">可运行的端到端服务示例</span><span lang="en">a runnable end-to-end service example</span></td></tr></table></div><div class="card tip"><div class="tag"><span lang="zh">💡 设计亮点</span><span lang="en">💡 Design highlight</span></div><div lang="zh">你已经走完「<strong>会用 → 懂原理 → 自己造</strong>」的全程：组合少数清晰的构件，就能搭出可观测、可控、可扩展、可部署的 agent。</div><div lang="en">You've gone the full "<strong>use it → understand it → build it</strong>" arc: composing a few clear building blocks yields an agent that is observable, controllable, extensible and deployable.</div></div><div class="keypoints"><div class="kp-title"><span lang="zh">✅ 关键要点</span><span lang="en">✅ Key takeaways</span></div><ul><li><span lang="zh">真实 agent = 模型 + 凭证 + 工具 + 权限 + 工作区 + 中间件，经事件流消费。</span><span lang="en">A real agent = model + credential + tools + permission + workspace + middleware, consumed via the event stream.</span></li><li><span lang="zh">同一个 agent 可用 <code>create_app</code> 升级为多租户服务。</span><span lang="en">The same agent levels up to a multi-tenant service via <code>create_app</code>.</span></li><li><span lang="zh">组合清晰构件 > 堆砌复杂编排。</span><span lang="en">Composing clear building blocks beats piling on complex orchestration.</span></li></ul></div><section class="quiz"><h2><span lang="zh">🧠 小测验</span><span lang="en">🧠 Quiz</span></h2><div class="quiz-q"><div class="quiz-prompt"><span lang="zh">一个完整的 agent 通常由哪些构件组合而成？</span><span lang="en">What building blocks compose a complete agent?</span></div><ol class="quiz-opts"><li><span lang="zh">模型 + 凭证 + 工具 + 权限 + 工作区 + 中间件</span><span lang="en">model + credential + tools + permission + workspace + middleware</span></li><li><span lang="zh">只有一个提示词</span><span lang="en">Just a single prompt</span></li><li><span lang="zh">只有一个数据库</span><span lang="en">Just a database</span></li></ol><details class="quiz-ans"><summary><span lang="zh">答案与解析</span><span lang="en">Answer & explanation</span></summary><div class="quiz-correct"><span lang="zh">模型 + 凭证 + 工具 + 权限 + 工作区 + 中间件</span><span lang="en">model + credential + tools + permission + workspace + middleware</span></div><div lang="zh">AgentScope 让你组合少数清晰构件，搭出可观测、可控、可扩展的 agent。</div><div lang="en">AgentScope lets you compose a few clear building blocks into an observable, controllable, extensible agent.</div></details></div></section>

@@ -161,6 +161,16 @@ class TestConvenience(unittest.TestCase):
     def test_blocks_joins_parts(self):
         self.assertEqual(i18n.blocks("<a>", "<b>", "<c>"), "<a><b><c>")
 
+    def test_steps_renders_visible_numbered_steps(self):
+        out = i18n.steps([("起步", "Start", "发消息", "send a message"),
+                          ("收尾", "Finish", "完成", "done")])
+        self.assertIn('<div class="steps">', out)
+        self.assertIn('<div class="step-n">1</div>', out)
+        self.assertIn('<div class="step-n">2</div>', out)
+        self.assertIn('<span lang="zh">起步</span>', out)
+        self.assertIn('<span lang="en">send a message</span>', out)
+        self.assertNotIn("<details", out)  # visible, not collapsed
+
 
 class TestSourceMap(unittest.TestCase):
     def test_source_map_renders_file_and_desc(self):
