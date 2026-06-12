@@ -60,6 +60,56 @@ LESSON_12 = blocks(
         "calling <code>next_handler</code> — the mechanism behind \"extend behavior without "
         "editing source\" (expanded in lesson 15).",
     ),
+    h2("中间件链：洋葱模型", "The middleware chain: an onion"),
+    accordion(
+        "一次 reply 如何层层穿过中间件",
+        "How one reply passes through the middleware layers",
+        blocks(
+            p(
+                "Agent 把每个阶段都实现成一条<strong>可嵌套的处理链</strong>。以模型调用为例，每个中间件的 "
+                "<code>on_model_call</code> 在调用 <code>next_handler</code> <strong>之前</strong>可以改写"
+                "入参（如系统提示、工具集），<strong>之后</strong>可以观测 / 改写结果——一层包一层，"
+                "正是「洋葱」。",
+                "The Agent implements each stage as a <strong>nestable handler chain</strong>. For the "
+                "model call, each middleware's <code>on_model_call</code> can rewrite the inputs "
+                "(system prompt, tool set) <strong>before</strong> calling <code>next_handler</code>, "
+                "and observe / rewrite the result <strong>after</strong> — layer wrapping layer, the "
+                "\"onion\".",
+            ),
+            code(
+                "async def on_model_call(self, agent, input_kwargs, next_handler):\n"
+                "    # —— 进入更内层之前 / before going deeper ——\n"
+                "    response = await next_handler(**input_kwargs)\n"
+                "    # —— 结果向外返回之后 / after the result comes back ——\n"
+                "    return response",
+                cap_zh="每个钩子都是「前 → next_handler → 后」的洋葱结构。",
+                cap_en="Every hook is a before → next_handler → after onion.",
+            ),
+        ),
+        num=1,
+    ),
+    table(
+        [("钩子", "Hook"), ("环绕的阶段", "Wraps")],
+        [
+            [("<code>on_reply</code>", "<code>on_reply</code>"),
+             ("整次回复（最外层）", "the whole reply (outermost)")],
+            [("<code>on_reasoning</code> / <code>on_acting</code>", "<code>on_reasoning</code> / <code>on_acting</code>"),
+             ("每轮推理 / 行动", "each reasoning / acting round")],
+            [("<code>on_model_call</code>", "<code>on_model_call</code>"),
+             ("每次调用模型", "each model call")],
+            [("<code>on_system_prompt</code> / <code>list_tools</code>", "<code>on_system_prompt</code> / <code>list_tools</code>"),
+             ("取系统提示 / 暴露的工具集（可动态改写）", "fetching the system prompt / exposed tools (rewritable)")],
+        ],
+    ),
+    note(
+        "<strong>权限</strong>与<strong>上下文卸载</strong>就接在这条链路上：行动阶段执行工具前由 "
+        "<code>PermissionEngine</code> 把关，上下文过长时 <code>compress_context</code> 压缩、"
+        "<code>offloader</code> 卸载（第 16 / 17 课）。",
+        "<strong>Permission</strong> and <strong>context offloading</strong> hook into this chain: "
+        "before a tool runs in the acting stage the <code>PermissionEngine</code> gates it, and when "
+        "context grows too long <code>compress_context</code> shrinks it and the "
+        "<code>offloader</code> offloads it (lessons 16 / 17).",
+    ),
     source_map([
         ("agent/_agent.py",
          "推理-行动循环、中间件链（<code>execute_chain</code> / <code>next_handler</code>）、"

@@ -64,6 +64,63 @@ LESSON_26 = blocks(
         "<code>DeveloperOrientedException</code> <strong>propagates to the developer</strong>. "
         "Choose accordingly: recoverable errors → the former, programming/config errors → the latter.",
     ),
+    h2("两条路怎么选 + 流式", "Choosing a path + streaming"),
+    table(
+        [("方式", "Approach"), ("成本", "Effort"), ("适用", "When")],
+        [
+            [("<code>FunctionTool(func)</code>", "<code>FunctionTool(func)</code>"),
+             ("最低：写个带类型注解 + docstring 的函数", "lowest: a typed, documented function"),
+             ("绝大多数工具", "the vast majority of tools")],
+            [("继承 <code>ToolBase</code>", "subclass <code>ToolBase</code>"),
+             ("较高：自己实现 <code>__call__</code> 等", "higher: implement <code>__call__</code> etc."),
+             ("需要自定义权限 / 流式 / 有状态", "custom permissions / streaming / stateful")],
+        ],
+    ),
+    code(
+        "from agentscope.tool import ToolBase, ToolChunk\n"
+        "from agentscope.message import TextBlock\n"
+        "from agentscope.permission import (\n"
+        "    PermissionContext, PermissionDecision, PermissionBehavior)\n\n"
+        "class RollDice(ToolBase):\n"
+        '    name: str = "roll_dice"\n'
+        '    description: str = "Roll an n-sided die."\n\n'
+        "    async def check_permissions(self, tool_input: dict,\n"
+        "                                context: PermissionContext) -> PermissionDecision:\n"
+        "        return PermissionDecision(behavior=PermissionBehavior.ALLOW, message=\"safe\")\n\n"
+        "    async def __call__(self, sides: int = 6) -> ToolChunk:\n"
+        "        import random\n"
+        "        return ToolChunk(\n"
+        "            content=[TextBlock(text=str(random.randint(1, sides)))], is_last=True)",
+        cap_zh="ToolBase 子类必须提供：name、description、check_permissions、__call__。",
+        cap_en="A ToolBase subclass must provide: name, description, check_permissions, __call__.",
+    ),
+    accordion(
+        "流式结果：ToolChunk vs ToolResponse",
+        "Streaming results: ToolChunk vs ToolResponse",
+        blocks(
+            p(
+                "工具可以<strong>流式</strong>产出：<code>__call__</code> 可以是异步生成器，逐个 "
+                "<code>yield ToolChunk(..., is_last=False)</code>，最后一块 <code>is_last=True</code>；"
+                "框架会把这些增量块<strong>累积</strong>成一个完整的 <code>ToolResponse</code>。"
+                "不需要流式时，返回单个 <code>ToolChunk</code>（或用 <code>FunctionTool</code> 直接返回 "
+                "<code>ToolResponse</code>）即可。",
+                "A tool can stream: <code>__call__</code> may be an async generator that "
+                "<code>yield</code>s <code>ToolChunk(..., is_last=False)</code> pieces, with "
+                "<code>is_last=True</code> on the final one; the framework <strong>accumulates</strong> "
+                "them into a complete <code>ToolResponse</code>. When you don't need streaming, return "
+                "a single <code>ToolChunk</code> (or, with <code>FunctionTool</code>, just return a "
+                "<code>ToolResponse</code>).",
+            ),
+        ),
+        num=1,
+    ),
+    note(
+        "默认优先 <code>FunctionTool</code>：它从签名 + docstring 自动生成 schema，省去最繁琐的部分。"
+        "只有当你需要细粒度权限、流式或跨调用状态时，才值得继承 <code>ToolBase</code>。",
+        "Prefer <code>FunctionTool</code> by default: it auto-generates the schema from the signature "
+        "+ docstring, sparing you the fiddliest part. Subclass <code>ToolBase</code> only when you "
+        "need fine-grained permissions, streaming, or state across calls.",
+    ),
     source_map([
         ("tool/_adapters.py", "<code>FunctionTool</code>（包装函数）",
          "<code>FunctionTool</code> (wraps a function)"),
@@ -145,6 +202,53 @@ LESSON_27 = blocks(
             "decide whether a hook is active).",
         )),
         num=1,
+    ),
+    h2("更多钩子：两种模式", "More hooks: two patterns"),
+    p(
+        "并非所有钩子都是「洋葱」式。<code>on_model_call</code> / <code>on_reply</code> 等是"
+        "<strong>洋葱模式</strong>（拿到 <code>next_handler</code>，前后包裹）；而 "
+        "<code>on_system_prompt</code> 是<strong>转换器模式</strong>：直接拿到当前系统提示、返回改写后的"
+        "版本，多个中间件依次串联。",
+        "Not every hook is an \"onion\". <code>on_model_call</code> / <code>on_reply</code> etc. are "
+        "the <strong>onion pattern</strong> (you get <code>next_handler</code> and wrap around it); "
+        "<code>on_system_prompt</code> is a <strong>transformer pattern</strong>: you receive the "
+        "current system prompt and return a rewritten one, chained across middlewares.",
+    ),
+    code(
+        "from agentscope.middleware import MiddlewareBase\n\n"
+        "class HouseStyleMiddleware(MiddlewareBase):\n"
+        "    # transformer hook: no next_handler — just transform & return\n"
+        "    async def on_system_prompt(self, agent, current_prompt: str) -> str:\n"
+        '        return current_prompt + "\\n\\nAlways answer concisely, in the user\'s language."',
+        cap_zh="on_system_prompt 是转换器：接收当前提示，返回改写后的提示。",
+        cap_en="on_system_prompt is a transformer: take the current prompt, return a rewritten one.",
+    ),
+    table(
+        [("钩子", "Hook"), ("模式", "Pattern"), ("典型用途", "Typical use")],
+        [
+            [("<code>on_reply</code> / <code>on_reasoning</code> / <code>on_acting</code>",
+              "<code>on_reply</code> / <code>on_reasoning</code> / <code>on_acting</code>"),
+             ("洋葱 / onion", "onion"),
+             ("计时、日志、重试、限流", "timing, logging, retries, throttling")],
+            [("<code>on_model_call</code>", "<code>on_model_call</code>"),
+             ("洋葱 / onion", "onion"),
+             ("观测 / 改写每次模型调用", "observe / rewrite each model call")],
+            [("<code>on_system_prompt</code>", "<code>on_system_prompt</code>"),
+             ("转换器 / transformer", "transformer"),
+             ("动态注入或改写系统提示", "dynamically inject / rewrite the system prompt")],
+            [("<code>list_tools</code>", "<code>list_tools</code>"),
+             ("提供 / provide", "provide"),
+             ("由中间件向 agent 额外提供工具", "have the middleware contribute extra tools")],
+        ],
+    ),
+    note(
+        "两个易错点：① 洋葱钩子里必须 <code>await next_handler(**input_kwargs)</code> 才会进入下一层，"
+        "忘了就拿到一个未执行的协程；② 只需实现你关心的钩子，其余保持默认即可——框架用 "
+        "<code>is_implemented</code> 判断某钩子是否启用。",
+        "Two gotchas: (1) in an onion hook you must <code>await next_handler(**input_kwargs)</code> to "
+        "reach the next layer — forgetting it yields an un-executed coroutine; (2) implement only the "
+        "hooks you care about and leave the rest as defaults — the framework uses "
+        "<code>is_implemented</code> to decide whether a hook is active.",
     ),
     source_map([
         ("middleware/_base.py",

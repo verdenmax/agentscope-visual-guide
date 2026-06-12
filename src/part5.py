@@ -178,6 +178,51 @@ LESSON_17 = blocks(
         )),
         num=1,
     ),
+    h2("后端对比与卸载协议", "Backends compared + the offload protocol"),
+    table(
+        [("后端", "Backend"), ("隔离性", "Isolation"), ("速度 / 启动", "Speed / setup"), ("适用", "Use case")],
+        [
+            [("<code>LocalWorkspace</code>", "<code>LocalWorkspace</code>"),
+             ("无（就是本机）", "none (your machine)"),
+             ("最快、零配置", "fastest, zero setup"),
+             ("本地开发 / 受信任", "local dev / trusted")],
+            [("<code>DockerWorkspace</code>", "<code>DockerWorkspace</code>"),
+             ("容器级", "container-level"),
+             ("需 Docker，启动稍慢", "needs Docker, slower start"),
+             ("限制副作用 / 不可信代码", "contain side effects / untrusted code")],
+            [("<code>E2BWorkspace</code>", "<code>E2BWorkspace</code>"),
+             ("云端沙箱、强隔离", "cloud sandbox, strong"),
+             ("需 e2b 账号 / 网络", "needs an e2b account / network"),
+             ("弹性 / 多租户生产", "elastic / multi-tenant prod")],
+        ],
+    ),
+    accordion(
+        "为什么 workspace 能直接当 offloader 用？",
+        "Why can a workspace be used directly as the offloader?",
+        blocks(
+            p(
+                "<code>WorkspaceBase</code> 实现了 <code>Offloader</code> 协议的 "
+                "<code>offload_context</code> 与 <code>offload_tool_result</code> 两个方法——它本来就管着"
+                "一个可读写的环境，把超长内容写进去再返回一个引用是顺理成章的。所以你可以直接 "
+                "<code>Agent(offloader=DockerWorkspace(...))</code>，让「执行环境」与「卸载存储」是同一个东西。",
+                "<code>WorkspaceBase</code> implements the <code>Offloader</code> protocol's "
+                "<code>offload_context</code> and <code>offload_tool_result</code> — it already owns a "
+                "read/write environment, so writing oversized content there and returning a reference "
+                "is natural. Hence you can pass <code>Agent(offloader=DockerWorkspace(...))</code>, "
+                "making the execution environment and the offload store one and the same.",
+            ),
+        ),
+        num=1,
+    ),
+    note(
+        "依赖提示：<code>DockerWorkspace</code> 需要本机有 Docker（<code>pip install agentscope[workspace]</code> "
+        "装上 <code>aiodocker</code>），<code>E2BWorkspace</code> 需要 <code>e2b</code> 与一个 API key；"
+        "<code>LocalWorkspace</code> 则无额外依赖。",
+        "Dependency note: <code>DockerWorkspace</code> needs Docker locally "
+        "(<code>pip install agentscope[workspace]</code> brings <code>aiodocker</code>), "
+        "<code>E2BWorkspace</code> needs <code>e2b</code> and an API key; <code>LocalWorkspace</code> "
+        "has no extra dependency.",
+    ),
     source_map([
         ("workspace/_base.py", "<code>WorkspaceBase</code> 统一接口",
          "<code>WorkspaceBase</code> unified interface"),
@@ -240,6 +285,68 @@ LESSON_18 = blocks(
         "and <code>HttpMCPConfig</code> (connect to a remote HTTP endpoint). Inside the Toolkit "
         "these external tools appear as <code>MCPTool</code> and are gated by the permission "
         "system just the same.",
+    ),
+    h2("连接与使用：完整流程", "Connect and use: the full flow"),
+    code(
+        "from agentscope.mcp import MCPClient, StdioMCPConfig, HttpMCPConfig\n"
+        "from agentscope.tool import Toolkit\n"
+        "from agentscope.agent import Agent\n\n"
+        "# A) 本地子进程服务器 / a local subprocess server\n"
+        "client = MCPClient(StdioMCPConfig(\n"
+        '    command="npx", args=["-y", "@modelcontextprotocol/server-filesystem", "."],\n'
+        "))\n"
+        "# B) 远程 HTTP 服务器 / a remote HTTP server\n"
+        "# client = MCPClient(HttpMCPConfig(url=\"https://my-mcp.example.com/mcp\"))\n\n"
+        "await client.connect()\n"
+        "toolkit = Toolkit(mcps=[client])      # 其工具自动注册进 Toolkit\n"
+        "agent = Agent(name=\"Friday\", system_prompt=\"...\", model=..., toolkit=toolkit)\n"
+        "# ... 用完记得 await client.close()",
+        cap_zh="连上 MCP 服务器，把它的工具接进 Toolkit，再交给 Agent。",
+        cap_en="Connect to an MCP server, register its tools into a Toolkit, then hand it to an Agent.",
+    ),
+    table(
+        [("配置", "Config"), ("用于", "For"), ("关键字段", "Key fields")],
+        [
+            [("<code>StdioMCPConfig</code>", "<code>StdioMCPConfig</code>"),
+             ("本地子进程（通过 stdio 通信）", "a local subprocess (talks over stdio)"),
+             ("<code>command</code> · <code>args</code> · <code>env</code> · <code>cwd</code>",
+              "<code>command</code> · <code>args</code> · <code>env</code> · <code>cwd</code>")],
+            [("<code>HttpMCPConfig</code>", "<code>HttpMCPConfig</code>"),
+             ("远程 HTTP 端点", "a remote HTTP endpoint"),
+             ("<code>url</code> · <code>headers</code> · <code>timeout</code>",
+              "<code>url</code> · <code>headers</code> · <code>timeout</code>")],
+        ],
+    ),
+    accordion(
+        "MCP 是什么，为什么值得用？",
+        "What is MCP, and why bother?",
+        blocks(
+            p(
+                "MCP（Model Context Protocol）是一套<strong>开放标准</strong>，让工具 / 数据源以统一方式"
+                "暴露给任意 agent 框架。这意味着你不必为每个能力重新造轮子——社区已有大量现成的 MCP "
+                "服务器（文件系统、数据库、浏览器、Git 等），<code>MCPClient</code> 连上即用。",
+                "MCP (Model Context Protocol) is an <strong>open standard</strong> for exposing tools / "
+                "data sources to any agent framework in a uniform way. So you don't reinvent every "
+                "capability — there's a large ecosystem of ready MCP servers (filesystem, databases, "
+                "browsers, Git, …) that <code>MCPClient</code> can plug into.",
+            ),
+            p(
+                "<code>client.list_tools()</code> 返回的是一组标准 <code>ToolBase</code>（实为 "
+                "<code>MCPTool</code>），所以它们和本地内置工具走<strong>完全相同</strong>的注册、"
+                "schema 生成与权限流程。",
+                "<code>client.list_tools()</code> returns standard <code>ToolBase</code>s (actually "
+                "<code>MCPTool</code>), so they go through the <strong>exact same</strong> "
+                "registration, schema-generation and permission flow as local built-in tools.",
+            ),
+        ),
+        num=1,
+    ),
+    note(
+        "两个易错点：① 用前必须 <code>await client.connect()</code>，用完 <code>await client.close()</code>；"
+        "② MCP 工具<strong>同样受权限系统管控</strong>——别因为它来自外部就以为会绕过确认（见第 16 课）。",
+        "Two gotchas: (1) you must <code>await client.connect()</code> before use and "
+        "<code>await client.close()</code> after; (2) MCP tools are <strong>gated by the permission "
+        "system too</strong> — don't assume \"external\" means it skips confirmation (see lesson 16).",
     ),
     source_map([
         ("mcp/_mcp_client.py",
@@ -396,6 +503,71 @@ LESSON_20 = blocks(
         "registered skills' instructions to the agent, and the built-in skill tool lets the agent "
         "invoke them at runtime — so \"writing a skill\" ≈ writing a structured playbook.",
     ),
+    h2("一个技能长什么样", "What a skill looks like"),
+    accordion(
+        "技能目录与 SKILL.md 示例",
+        "A skill directory and its SKILL.md",
+        blocks(
+            p(
+                "一个技能就是磁盘上的<strong>一个目录</strong>，核心是一份 Markdown「操作手册」。"
+                "<code>LocalSkillLoader</code> 从目录读出它的 <code>name</code> / <code>description</code> / "
+                "<code>markdown</code>：",
+                "A skill is just <strong>a directory</strong> on disk whose heart is a Markdown "
+                "\"playbook\". <code>LocalSkillLoader</code> reads its <code>name</code> / "
+                "<code>description</code> / <code>markdown</code> from that directory:",
+            ),
+            code(
+                "skills/\n"
+                "└── refund_policy/\n"
+                "    ├── SKILL.md        # name + description (front matter) + the how-to\n"
+                "    └── examples.md     # optional supporting files\n",
+                lang="text",
+            ),
+            code(
+                "# Refund policy        <-- name\n"
+                "How to process a customer refund request.   <-- description\n\n"
+                "## Steps\n"
+                "1. Verify the order id with the `lookup_order` tool.\n"
+                "2. Check it is within 30 days.\n"
+                "3. If eligible, call `issue_refund`; otherwise explain why.\n",
+                lang="text",
+                cap_zh="SKILL.md 本质上是一份结构化的操作手册，模型据此「照着做」。",
+                cap_en="SKILL.md is essentially a structured playbook the model follows.",
+            ),
+        ),
+        num=1,
+    ),
+    table(
+        [("机制", "Mechanism"), ("是什么", "What it is"), ("何时用", "When to use")],
+        [
+            [("技能 Skill", "Skill"),
+             ("一份 Markdown 操作手册（如何做某类任务）", "a Markdown playbook (how to do a class of task)"),
+             ("把可复用的「做法 / 流程」教给 agent", "teach the agent a reusable procedure")],
+            [("工具 Tool", "Tool"),
+             ("一段可执行的代码（函数 / 类）", "executable code (a function / class)"),
+             ("让 agent 真正「动手」执行某操作", "let the agent actually perform an action")],
+            [("MCP", "MCP"),
+             ("接入外部服务器提供的工具", "tools from an external server"),
+             ("复用别人已实现的能力", "reuse capabilities others built")],
+        ],
+    ),
+    code(
+        "from agentscope.tool import Toolkit\n"
+        "from agentscope.skill import LocalSkillLoader\n\n"
+        "toolkit = Toolkit(\n"
+        '    skills_or_loaders=["./skills", LocalSkillLoader("./more_skills")],\n'
+        ")\n"
+        "# Toolkit 汇集各技能的说明，agent 在运行时按需取用",
+        cap_zh="把技能目录交给 Toolkit；说明会作为提示提供给 agent。",
+        cap_en="Hand skill directories to the Toolkit; their instructions are surfaced to the agent.",
+    ),
+    tip(
+        "<strong>技能 vs 工具</strong>：要「教做法 / 知识 / 流程」用技能（纯 Markdown，无需写代码）；"
+        "要「执行动作」（读写文件、调 API）用工具。两者常配合：技能里引用工具名，告诉模型何时调用。",
+        "<strong>Skill vs tool</strong>: use a skill to teach a procedure / knowledge / workflow "
+        "(pure Markdown, no code); use a tool to perform an action (read/write files, call an API). "
+        "They pair up: a skill references tool names and tells the model when to call them.",
+    ),
     source_map([
         ("skill/_base.py", "<code>Skill</code> / <code>SkillLoaderBase</code>",
          "<code>Skill</code> / <code>SkillLoaderBase</code>"),
@@ -450,6 +622,60 @@ LESSON_21 = blocks(
         "With vectors in hand, pair them with a vector store (nearest-neighbor search) to do "
         "RAG: feed relevant documents back into the model's context. AgentScope provides the "
         "embedding + caching foundation; the vector store choice is left to your application.",
+    ),
+    h2("从嵌入到 RAG", "From embeddings to RAG"),
+    code(
+        "from agentscope.embedding import DashScopeEmbeddingModel, FileEmbeddingCache\n\n"
+        "embed = DashScopeEmbeddingModel(\n"
+        "    credential=...,\n"
+        '    model="text-embedding-v4",\n'
+        "    embedding_cache=FileEmbeddingCache(...),   # 命中缓存就不再请求 API\n"
+        ")\n"
+        'resp = await embed(["退款政策是什么？", "如何修改收货地址？"])\n'
+        "vectors = resp.embeddings        # 每条文本一个向量 / one vector per input",
+        cap_zh="嵌入模型是 async 可调用对象，返回 EmbeddingResponse；缓存可选但很省钱。",
+        cap_en="An embedding model is async-callable, returns an EmbeddingResponse; caching is optional but saves money.",
+    ),
+    accordion(
+        "RAG 全流程：嵌入只是其中一环",
+        "The full RAG flow: embeddings are just one link",
+        blocks(
+            p(
+                "检索增强生成（RAG）的典型链路如下。AgentScope 负责其中的<strong>嵌入与缓存</strong>这块基石，"
+                "而<strong>向量库</strong>（存向量、做最近邻检索）由你的应用自选（如 FAISS / Qdrant / pgvector）。",
+                "A typical retrieval-augmented-generation (RAG) pipeline looks like this. AgentScope "
+                "provides the <strong>embedding + caching</strong> foundation; the <strong>vector "
+                "store</strong> (holding vectors and doing nearest-neighbor search) is your "
+                "application's choice (e.g. FAISS / Qdrant / pgvector).",
+            ),
+            code(
+                "文档 → 切块 → 嵌入(AgentScope) → 存入向量库(你选) →\n"
+                "    查询时：问题嵌入 → 最近邻检索 → 把相关片段拼进上下文 → 交给 Agent\n\n"
+                "Document -> chunk -> embed (AgentScope) -> vector store (yours) ->\n"
+                "    at query time: embed the question -> nearest-neighbor search ->\n"
+                "    stuff the relevant chunks into context -> hand to the Agent",
+                lang="text",
+            ),
+        ),
+        num=1,
+    ),
+    table(
+        [("厂商", "Vendor"), ("类", "Class")],
+        [
+            [("DashScope", "DashScope"), ("<code>DashScopeEmbeddingModel</code>", "<code>DashScopeEmbeddingModel</code>")],
+            [("OpenAI", "OpenAI"), ("<code>OpenAIEmbeddingModel</code>", "<code>OpenAIEmbeddingModel</code>")],
+            [("Gemini / Ollama", "Gemini / Ollama"),
+             ("<code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code>",
+              "<code>GeminiEmbeddingModel</code> / <code>OllamaEmbeddingModel</code>")],
+        ],
+    ),
+    note(
+        "嵌入调用通常是<strong>批量且重复</strong>的（同一批文档反复嵌入）。<code>FileEmbeddingCache</code> "
+        "把结果缓存到磁盘，命中即跳过 API 调用——既省钱又提速。缓存基类是 <code>EmbeddingCacheBase</code>，可自定义后端。",
+        "Embedding calls are often <strong>batched and repetitive</strong> (re-embedding the same "
+        "documents). <code>FileEmbeddingCache</code> caches results to disk and skips the API call "
+        "on a hit — saving money and time. The base is <code>EmbeddingCacheBase</code>, so you can "
+        "plug in your own backend.",
     ),
     source_map([
         ("embedding/_embedding_base.py", "<code>EmbeddingModelBase</code>（可调用，async）",
@@ -511,6 +737,57 @@ LESSON_22 = blocks(
         "Add <code>TTSMiddleware</code> to <code>Agent(middlewares=[...])</code> (lesson 15) and "
         "the agent's text output is synthesized to speech automatically — no change to the "
         "agent's core logic.",
+    ),
+    h2("接入与选型", "Wiring and choosing a model"),
+    code(
+        "from agentscope.agent import Agent\n"
+        "from agentscope.middleware import TTSMiddleware\n"
+        "from agentscope.tts import DashScopeRealtimeTTSModel\n\n"
+        "agent = Agent(\n"
+        '    name="Friday", system_prompt="...", model=...,\n'
+        "    middlewares=[TTSMiddleware(tts_model=DashScopeRealtimeTTSModel(...))],\n"
+        ")\n"
+        "# agent 产出文本时，中间件自动把它送去合成语音——agent 主逻辑无感知",
+        cap_zh="把 TTSMiddleware 挂到 Agent 上，文本回复即自动转语音。",
+        cap_en="Attach TTSMiddleware to the Agent; text replies are synthesized to speech automatically.",
+    ),
+    table(
+        [("模型", "Model"), ("合成方式", "Synthesis"), ("适用", "Use case")],
+        [
+            [("<code>DashScopeTTSModel</code>", "<code>DashScopeTTSModel</code>"),
+             ("整段文本就绪后一次性合成", "one-shot, after the full text is ready"),
+             ("离线 / 不在意首字延迟", "offline / latency not critical")],
+            [("<code>DashScopeRealtimeTTSModel</code>", "<code>DashScopeRealtimeTTSModel</code>"),
+             ("边生成边推送、流式合成", "streaming — push as text is generated"),
+             ("语音对话 / 低延迟", "voice chat / low latency")],
+        ],
+    ),
+    accordion(
+        "实时 TTS 的工作方式",
+        "How realtime TTS works",
+        blocks(
+            p(
+                "<code>TTSModelBase</code> 是一个<strong>异步上下文管理器</strong>：先 "
+                "<code>connect()</code> 建立会话，随着模型不断吐字，用 <code>push(text)</code> "
+                "把增量文本送进去，底层<strong>边收边合成</strong>音频，最后 <code>close()</code>。"
+                "一次性的 <code>synthesize()</code> 则是把整段文本一口气合成。",
+                "<code>TTSModelBase</code> is an <strong>async context manager</strong>: "
+                "<code>connect()</code> opens a session, then as the model streams text you "
+                "<code>push(text)</code> the increments and the backend <strong>synthesizes audio "
+                "as it arrives</strong>, ending with <code>close()</code>. The one-shot "
+                "<code>synthesize()</code> instead renders the whole text at once.",
+            ),
+        ),
+        num=1,
+    ),
+    tip(
+        "按<strong>延迟需求</strong>选型：做语音助手 / 实时对话用 <code>DashScopeRealtimeTTSModel</code>"
+        "（首字更快、可打断）；批量生成音频文件用 <code>DashScopeTTSModel</code> 即可。无论哪种，"
+        "都通过 <code>TTSMiddleware</code> 接入，不动 agent 主逻辑。",
+        "Choose by <strong>latency</strong>: for a voice assistant / live dialogue use "
+        "<code>DashScopeRealtimeTTSModel</code> (faster first sound, interruptible); for batch "
+        "audio files <code>DashScopeTTSModel</code> is fine. Either way you wire it via "
+        "<code>TTSMiddleware</code> without touching the agent's core logic.",
     ),
     source_map([
         ("tts/_tts_base.py", "<code>TTSModelBase</code>（connect/push/synthesize，async）",
