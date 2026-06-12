@@ -171,6 +171,61 @@ LESSON_13 = blocks(
         "after confirmation. <code>FunctionTool</code> adapts plain functions and "
         "<code>MCPTool</code> adapts tools from an MCP server (lesson 18).",
     ),
+    h2("函数如何变成 schema · 分组激活", "Function → schema · group activation"),
+    accordion(
+        "签名 + docstring → JSON schema（前后对照）",
+        "Signature + docstring → JSON schema (before / after)",
+        blocks(
+            p(
+                "<code>Toolkit</code> 读取每个工具的<strong>类型注解</strong>推断参数类型、读取 "
+                "<strong>docstring</strong> 提取名称与描述，自动产出模型能理解的 JSON schema：",
+                "<code>Toolkit</code> reads each tool's <strong>type hints</strong> to infer "
+                "parameter types and its <strong>docstring</strong> for the name and description, "
+                "auto-producing a JSON schema the model understands:",
+            ),
+            code(
+                "def get_weather(city: str) -> str:\n"
+                '    """Look up the weather for a city.\n\n'
+                "    Args:\n"
+                "        city (str): the city name\n"
+                '    """',
+                cap_zh="你写的函数……",
+                cap_en="The function you write…",
+            ),
+            code(
+                '{"name": "get_weather",\n'
+                ' "description": "Look up the weather for a city.",\n'
+                ' "parameters": {"type": "object",\n'
+                '   "properties": {"city": {"type": "string", "description": "the city name"}},\n'
+                '   "required": ["city"]}}',
+                lang="json",
+                cap_zh="……Toolkit 自动生成的 schema（经 get_tool_schemas 交给模型）。",
+                cap_en="…the schema Toolkit auto-builds (handed to the model via get_tool_schemas).",
+            ),
+        ),
+        num=1,
+    ),
+    table(
+        [("职责", "Responsibility"), ("方法 / 机制", "Method / mechanism")],
+        [
+            [("注册工具 / MCP / 技能", "register tools / MCP / skills"),
+             ("<code>Toolkit(tools=, mcps=, skills_or_loaders=)</code>", "<code>Toolkit(tools=, mcps=, skills_or_loaders=)</code>")],
+            [("生成 schema", "produce schemas"),
+             ("<code>await get_tool_schemas()</code>", "<code>await get_tool_schemas()</code>")],
+            [("执行工具", "execute a tool"),
+             ("<code>call_tool(tool_call, state)</code>（async generator）", "<code>call_tool(tool_call, state)</code> (async generator)")],
+            [("分组启用 / 停用", "enable / disable groups"),
+             ("<code>ToolGroup</code> + 激活集", "<code>ToolGroup</code> + the active set")],
+        ],
+    ),
+    p(
+        "<strong>工具分组</strong>让你按需暴露能力：把工具归入 <code>ToolGroup</code>，运行时只激活"
+        "需要的组——例如先只给「只读」组，确认后再激活「写」组，从而缩小模型一次能用的工具面。",
+        "<strong>Tool groups</strong> let you expose capabilities on demand: put tools into a "
+        "<code>ToolGroup</code> and activate only the groups you need at runtime — e.g. expose a "
+        "\"read-only\" group first and activate a \"write\" group after confirmation, shrinking the "
+        "tool surface the model sees at once.",
+    ),
     source_map([
         ("tool/_toolkit.py",
          "<code>get_tool_schemas</code>(async)、<code>call_tool</code>、工具/MCP/技能注册",
@@ -253,6 +308,51 @@ LESSON_14 = blocks(
         "data = resp.content        # a dict matching Person's schema",
         cap_zh="用 Pydantic 模型约束输出，从 StructuredResponse.content 取 dict。",
         cap_en="Constrain output with a Pydantic model; read the dict from StructuredResponse.content.",
+    ),
+    h2("读懂一个 ChatResponse", "Reading a ChatResponse"),
+    code(
+        "resp = await model(messages)          # 直接调用模型 / call the model directly\n"
+        "for block in resp.content:            # 内容块序列 / a sequence of content blocks\n"
+        "    if block.type == \"text\":\n"
+        "        print(block.text)\n"
+        "    elif block.type == \"tool_call\":  # ToolCallBlock：模型想调用工具\n"
+        "        print(block.name, block.input)\n"
+        "if resp.usage:                        # ChatUsage：token 用量\n"
+        "    print(resp.usage.input_tokens, resp.usage.output_tokens, resp.usage.time)",
+        cap_zh="ChatResponse = 内容块序列 + 可选的 ChatUsage。",
+        cap_en="A ChatResponse = a sequence of content blocks + an optional ChatUsage.",
+    ),
+    table(
+        [("类型", "Type"), ("装着什么", "Holds")],
+        [
+            [("<code>ChatResponse</code>", "<code>ChatResponse</code>"),
+             ("<code>content</code>（文本/思考/工具调用块）+ <code>usage</code> + <code>is_last</code>",
+              "<code>content</code> (text/thinking/tool-call blocks) + <code>usage</code> + <code>is_last</code>")],
+            [("<code>StructuredResponse</code>", "<code>StructuredResponse</code>"),
+             ("<code>content</code>：符合你给定 schema 的 <code>dict</code>",
+              "<code>content</code>: a <code>dict</code> matching your schema")],
+            [("<code>ChatUsage</code>", "<code>ChatUsage</code>"),
+             ("<code>input_tokens</code> / <code>output_tokens</code> / <code>time</code> 等",
+              "<code>input_tokens</code> / <code>output_tokens</code> / <code>time</code>, …")],
+        ],
+    ),
+    accordion(
+        "流式 vs 一次性：同一个响应形状",
+        "Streaming vs one-shot: the same response shape",
+        blocks(
+            p(
+                "一次性调用返回单个 <code>ChatResponse</code>（<code>is_last=True</code>）。流式时，模型"
+                "会陆续产出多个 <code>ChatResponse</code> 片段，每个带累积到当下的 <code>content</code>，"
+                "最后一个 <code>is_last=True</code>。<strong>形状始终一致</strong>，所以上层（Agent / 你的代码）"
+                "无需为两种模式写两套解析逻辑。",
+                "A one-shot call returns a single <code>ChatResponse</code> (<code>is_last=True</code>). "
+                "When streaming, the model yields successive <code>ChatResponse</code> pieces, each "
+                "with the <code>content</code> accumulated so far, the last one "
+                "<code>is_last=True</code>. <strong>The shape is always the same</strong>, so callers "
+                "(the Agent / your code) need not write two parsers.",
+            ),
+        ),
+        num=1,
     ),
     source_map([
         ("model/_base.py", "<code>ChatModelBase</code> 调用契约",

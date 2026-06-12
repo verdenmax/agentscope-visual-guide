@@ -222,6 +222,53 @@ LESSON_06 = blocks(
         "<code>AnthropicCredential</code>, <code>GeminiCredential</code>, …; "
         "<code>CredentialFactory</code> offers a unified create-by-type entry point.",
     ),
+    h2("多厂商凭证 + 环境变量模式", "Credentials across vendors + the env-var pattern"),
+    table(
+        [("厂商", "Vendor"), ("凭证类", "Credential class")],
+        [
+            [("DashScope", "DashScope"), ("<code>DashScopeCredential</code>", "<code>DashScopeCredential</code>")],
+            [("OpenAI", "OpenAI"), ("<code>OpenAICredential</code>", "<code>OpenAICredential</code>")],
+            [("Anthropic", "Anthropic"), ("<code>AnthropicCredential</code>", "<code>AnthropicCredential</code>")],
+            [("Gemini / DeepSeek / Moonshot / XAI / Ollama", "Gemini / DeepSeek / Moonshot / XAI / Ollama"),
+             ("<code>GeminiCredential</code> 等", "<code>GeminiCredential</code>, etc.")],
+        ],
+    ),
+    accordion(
+        "推荐：环境变量 / .env 模式",
+        "Recommended: the env-var / .env pattern",
+        blocks(
+            p(
+                "把密钥放进环境变量（或 <code>.env</code> 文件 + 加载器），代码只读取、绝不写死。"
+                "这样同一份代码在开发 / 测试 / 生产用不同的 key，且 key 永远不进版本库。",
+                "Put keys in environment variables (or a <code>.env</code> file + loader); code only "
+                "reads them, never hardcodes. The same code then uses different keys across "
+                "dev / test / prod, and keys never enter version control.",
+            ),
+            code(
+                "# .env（加入 .gitignore，切勿提交）\n"
+                "DASHSCOPE_API_KEY=sk-xxxxxxxx\n",
+                lang="bash",
+            ),
+            code(
+                "import os\n"
+                "from agentscope.credential import DashScopeCredential\n\n"
+                "cred = DashScopeCredential(api_key=os.environ[\"DASHSCOPE_API_KEY\"])\n"
+                "# 配置驱动的场景可用 CredentialFactory 按「类型 + 字段」批量创建凭证",
+                cap_zh="从环境变量读取；多凭证可用 CredentialFactory 统一创建。",
+                cap_en="Read from the environment; CredentialFactory can create many by type.",
+            ),
+        ),
+        num=1,
+    ),
+    tip(
+        "解耦带来的实际好处：<strong>轮换</strong>（换 key 不动模型代码）、<strong>最小权限</strong>"
+        "（每个环境 / 服务独立 key）、<strong>可观测</strong>（按凭证统计用量）。这些都建立在"
+        "「密钥不在代码里」的前提上。",
+        "What decoupling buys you: <strong>rotation</strong> (swap a key without touching model "
+        "code), <strong>least privilege</strong> (a separate key per env / service), and "
+        "<strong>observability</strong> (usage attributed per credential) — all premised on "
+        "\"keys are not in the code\".",
+    ),
     source_map([
         ("credential/_base.py", "<code>CredentialBase</code>",
          "<code>CredentialBase</code>"),
