@@ -233,6 +233,13 @@ LESSON_11 = blocks(
         "the unified <code>Msg</code> list into the concrete structure a given vendor's API "
         "expects (a list of <code>dict</code>s).",
     ),
+    flow(
+        [("统一的 Msg 列表", "Unified Msg list"), ("Formatter.format()", "Formatter.format()"),
+         ("厂商专属 list[dict]", "Vendor-specific list[dict]"), ("发给厂商 API", "Vendor API")],
+        "Formatter 是「翻译层」：同一份 Msg，换个 formatter 就能适配不同厂商的请求格式。",
+        "The formatter is the translation layer: the same Msg list adapts to different vendors' "
+        "request shapes just by swapping formatters.",
+    ),
     analogy(
         "像一位<strong>同声传译</strong>：你只管用「中文」（统一的 <code>Msg</code>）表达，"
         "传译会把它转成对方听得懂的「日语 / 法语」（各厂商格式）。",

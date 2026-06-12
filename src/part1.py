@@ -20,6 +20,12 @@ LESSON_00 = blocks(
         "Truly \"from zero\": this lesson gets you to <strong>install AgentScope, set your key, "
         "and run your first program</strong> before any concepts.",
     ),
+    flow(
+        [("安装 AgentScope", "Install"), ("配置 API 密钥", "Set API key"),
+         ("写第一个 agent", "Write an agent"), ("运行并看事件流", "Run & watch events")],
+        "走通这四步，后面每一课的示例代码都能直接跑起来。",
+        "Clear these four steps and every later lesson's sample code runs as-is.",
+    ),
     analogy(
         "像组装家具前先<strong>清点零件、备好螺丝刀</strong>：环境配好，后面每一课的代码才能直接跑。",
         "Like <strong>laying out the parts and a screwdriver</strong> before assembling "

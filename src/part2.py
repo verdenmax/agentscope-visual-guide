@@ -6,7 +6,7 @@ model/, credential/, tool/, agent/_agent.py).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -105,6 +105,13 @@ LESSON_05 = blocks(
         "<code>ChatModelBase</code> and exposes a unified interface; a call returns a "
         "<code>ChatResponse</code> (content blocks + usage).",
     ),
+    flow(
+        [("发起调用", "Call model"), ("失败？自动重试 ×N", "Fail? retry ×N"),
+         ("仍失败→备用模型", "Still failing → fallback"), ("ChatResponse", "ChatResponse")],
+        "重试与回退都封装在统一接口内：你的业务代码不变，可靠性靠 ModelConfig 配置。",
+        "Retries and fallback live inside the unified interface: your business code is unchanged; "
+        "reliability is configured via ModelConfig.",
+    ),
     analogy(
         "像一个<strong>万能遥控器</strong>：不管电视是哪个牌子，按钮都一样。换模型 = 换一个"
         "<code>ChatModelBase</code> 子类，调用代码几乎不动。",
@@ -193,6 +200,13 @@ LESSON_06 = blocks(
         "<strong>Credentials</strong> separate \"secrets\" from \"model config\". Each vendor "
         "has its own <code>CredentialBase</code> subclass, and <code>CredentialFactory</code> "
         "can create them on demand.",
+    ),
+    flow(
+        [("环境变量 / 密钥库", "Env var / secret store"), ("Credential 对象", "Credential object"),
+         ("注入 ChatModel", "Inject into ChatModel"), ("调用时用于鉴权", "Used to authenticate")],
+        "密钥与模型配置分离：配置可公开，密钥单独保管、运行时才注入——绝不写进源码。",
+        "Secrets are decoupled from model config: config can be public, the secret is held "
+        "separately and injected at runtime — never in source.",
     ),
     analogy(
         "像<strong>门禁卡</strong>与<strong>办公室</strong>分开：办公室（模型）的布置是公开的，"
@@ -298,6 +312,14 @@ LESSON_07 = blocks(
         "<strong>Tools</strong> are the agent's \"hands\". <code>Toolkit</code> registers and "
         "manages tools and auto-generates a JSON schema from each tool's signature / docstring, "
         "so the model knows what's available and how to call it.",
+    ),
+    flow(
+        [("写普通函数", "Write a function"), ("注册进 Toolkit", "Register in Toolkit"),
+         ("自动生成 schema", "Auto schema"), ("模型据此选择调用", "Model picks & calls"),
+         ("执行得到结果", "Execute"), ("结果回灌上下文", "Result → context")],
+        "你只写函数；schema 自动生成，模型据此决定调用，结果再观察回对话——无需手写工具描述。",
+        "You only write the function; the schema is generated, the model decides the call, and "
+        "results flow back into context — no hand-written tool descriptions.",
     ),
     analogy(
         "像给助手配一套<strong>工具箱</strong>：每件工具都贴有「说明标签」（schema）。你只管把工具"

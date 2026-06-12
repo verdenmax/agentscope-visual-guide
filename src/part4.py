@@ -391,6 +391,13 @@ LESSON_15 = blocks(
         "<strong>without editing the Agent's source</strong>: tracing, logging, caching, "
         "rewriting the system prompt, adding/removing tools…",
     ),
+    flow(
+        [("on_reply（整次）", "on_reply (whole)"), ("on_reasoning / on_acting（每步）", "per step"),
+         ("on_model_call（每次模型调用）", "on_model_call"), ("真正执行", "real call")],
+        "中间件像洋葱：外层包内层；同一请求自外向内进入、自内向外返回——多个中间件按注册顺序嵌套。",
+        "Middleware nests like an onion: outer wraps inner; a request goes in outside-to-inside "
+        "and returns inside-to-outside — multiple middlewares nest in registration order.",
+    ),
     analogy(
         "像给函数加<strong>装饰器</strong>：原函数不变，你在它前后包一层，做记录、改参数或拦截。"
         "中间件就是 agent 循环各阶段的装饰器。",

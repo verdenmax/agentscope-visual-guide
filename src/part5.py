@@ -22,6 +22,14 @@ LESSON_16 = blocks(
         "<code>PermissionDecision</code> for each tool call from a set of "
         "<code>PermissionRule</code>s and the current <code>PermissionMode</code>.",
     ),
+    flow(
+        [("工具调用", "Tool call"), ("查规则 + 当前模式", "Rules + mode"),
+         ("裁决：允许/拒绝/需确认", "Allow / deny / confirm"), ("需确认→等用户", "Confirm → user"),
+         ("执行或拦截", "Run or block")],
+        "DEFAULT 下危险操作触发人工确认的往返；BYPASS 模式跳过裁决直接放行——务必谨慎使用。",
+        "Under DEFAULT, risky calls trigger a human-confirm round-trip; BYPASS skips the decision "
+        "and runs everything — use it with great care.",
+    ),
     analogy(
         "像公司的<strong>门禁与审批</strong>：有的门随便进（允许），有的要刷卡（按规则），"
         "有的必须主管点头（人工确认），紧急演练时可临时全开（bypass）。",
@@ -256,6 +264,14 @@ LESSON_18 = blocks(
         "<strong>MCP (Model Context Protocol)</strong> is a standard for connecting to external "
         "tool servers. An <code>MCPClient</code> connects to an MCP server and turns its tools "
         "<strong>into AgentScope tools</strong> you register straight into a <code>Toolkit</code>.",
+    ),
+    flow(
+        [("MCPClient 连接服务器", "MCPClient connects"), ("列出远程工具", "List remote tools"),
+         ("转成 AgentScope 工具", "Wrap as AS tools"), ("注册进 Toolkit", "Register in Toolkit"),
+         ("agent 像本地工具一样调用", "Call like local tools")],
+        "连上 MCP 服务器后，远程工具与本地工具的注册和调用方式完全一致。",
+        "Once connected to an MCP server, remote tools register and get called exactly like local "
+        "tools.",
     ),
     analogy(
         "像给工具箱接上一个<strong>外部供应商目录</strong>：你不必自己造每件工具，连上供应商"

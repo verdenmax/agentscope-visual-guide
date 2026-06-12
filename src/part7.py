@@ -6,7 +6,7 @@ tool/_response.py, middleware/_base.py, agent/_agent.py).
 
 from i18n import (
     lead, h2, h3, p, card, code, table, accordion, keypoints,
-    source_map, analogy, note, tip, important, highlight, blocks, t,
+    source_map, analogy, note, tip, important, highlight, blocks, t, flow,
 )
 
 # ---------------------------------------------------------------------------
@@ -290,6 +290,14 @@ LESSON_28 = blocks(
         '<a href="17-workspace.html">workspace</a> + '
         'a <a href="27-custom-middleware.html">custom middleware</a>, '
         'consumed via the <a href="10-streaming.html">event stream</a>.',
+    ),
+    flow(
+        [("UserMsg", "UserMsg"), ("Agent：模型+工具+权限+工作区", "Agent: model+tools+perm+workspace"),
+         ("经中间件", "via middleware"), ("工具执行", "Tools run"), ("事件流", "Event stream"),
+         ("AssistantMsg", "AssistantMsg")],
+        "这正是全书各模块拼在一起的端到端链路——前面每一课都是其中一环。",
+        "This is the end-to-end pipeline of every module combined — each earlier lesson is one "
+        "link in it.",
     ),
     analogy(
         "前面每一课是一块<strong>乐高积木</strong>；这一课把它们<strong>拼成一台完整的机器</strong>。",
