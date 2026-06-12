@@ -54,6 +54,54 @@ LESSON_16 = blocks(
         "<code>REQUIRE_USER_CONFIRM</code> event (lesson 9), pausing for human approval — this "
         "is the source of the README's \"permission control\" and bypass mode.",
     ),
+    h2("两种实操：放行或绕过", "Two practical paths: confirm or bypass"),
+    p(
+        "默认模式（<code>PermissionMode.DEFAULT</code>）下，写文件等操作会<strong>暂停等待确认</strong>："
+        "<code>reply_stream</code> 发出 <code>REQUIRE_USER_CONFIRM</code> 后即结束。要继续，你需要把一个 "
+        "<code>UserConfirmResultEvent</code>（含 <code>ConfirmResult</code>）<strong>回传</strong>给 "
+        "<code>reply_stream</code>；或在受控场景下改用 <code>PermissionMode.BYPASS</code> 一路放行。",
+        "In the default mode (<code>PermissionMode.DEFAULT</code>), operations like writing files "
+        "<strong>pause for confirmation</strong>: <code>reply_stream</code> emits "
+        "<code>REQUIRE_USER_CONFIRM</code> and then ends. To continue you feed a "
+        "<code>UserConfirmResultEvent</code> (carrying a <code>ConfirmResult</code>) "
+        "<strong>back into</strong> <code>reply_stream</code>; or, in controlled settings, use "
+        "<code>PermissionMode.BYPASS</code> to allow everything.",
+    ),
+    code(
+        "from agentscope.event import EventType, UserConfirmResultEvent, ConfirmResult\n\n"
+        "async for evt in agent.reply_stream(user_msg):\n"
+        "    if evt.type == EventType.REQUIRE_USER_CONFIRM:\n"
+        "        # ask the human, then resume by feeding the decision back\n"
+        "        results = [\n"
+        "            ConfirmResult(confirmed=True, tool_call=tc)\n"
+        "            for tc in evt.tool_calls\n"
+        "        ]\n"
+        "        async for evt2 in agent.reply_stream(\n"
+        "            UserConfirmResultEvent(reply_id=evt.reply_id,\n"
+        "                                   confirm_results=results)):\n"
+        "            ...   # continue consuming the resumed stream",
+        cap_zh="确认回路：把 UserConfirmResultEvent 回传给 reply_stream 以继续。",
+        cap_en="The confirm round-trip: feed a UserConfirmResultEvent back to resume.",
+    ),
+    code(
+        "from agentscope.agent import Agent\n"
+        "from agentscope.state import AgentState\n"
+        "from agentscope.permission import PermissionContext, PermissionMode\n\n"
+        "agent = Agent(\n"
+        '    name="Friday", system_prompt="...", model=..., toolkit=...,\n'
+        "    state=AgentState(\n"
+        "        permission_context=PermissionContext(mode=PermissionMode.BYPASS),\n"
+        "    ),\n"
+        ")   # no confirmation prompts — runs end-to-end (use only when safe)",
+        cap_zh="无人值守：用 BYPASS 模式跳过确认（仅在可信场景）。",
+        cap_en="Unattended: BYPASS skips confirmation (only when it's safe).",
+    ),
+    note(
+        "模式还有 <code>ACCEPT_EDITS</code>（自动允许工作目录内的读写）、<code>EXPLORE</code>、"
+        "<code>DONT_ASK</code> 等，适配不同信任级别。",
+        "Other modes include <code>ACCEPT_EDITS</code> (auto-allow reads/writes inside working "
+        "directories), <code>EXPLORE</code> and <code>DONT_ASK</code>, for different trust levels.",
+    ),
     source_map([
         ("permission/_engine.py", "<code>PermissionEngine</code>",
          "<code>PermissionEngine</code>"),
@@ -244,11 +292,48 @@ LESSON_19 = blocks(
         "storage backend — enabling \"multi-session isolation\" and \"resume a conversation\". "
         "<code>TaskContext</code> carries the runtime context tied to a given <code>Task</code>.",
     ),
+    h2("任务规划工具", "Task-planning tools"),
+    p(
+        "前面讲的是<strong>被动的数据</strong>（<code>Task</code> / <code>TaskContext</code>）。"
+        "AgentScope 还提供一组<strong>主动的规划工具</strong>，让 agent 自己把复杂工作"
+        "拆成一份<strong>可追踪、可更新的计划</strong>——这正是 README 里「Task planning」那张动图。"
+        "在 Agent Service（第 23 课）中，这些工具会被<strong>自动加入每个会话的工具箱</strong>。",
+        "Above we covered the <strong>passive data</strong> (<code>Task</code> / "
+        "<code>TaskContext</code>). AgentScope also ships <strong>active planning tools</strong> "
+        "that let the agent break complex work into a <strong>tracked, updatable plan</strong> — "
+        "this is the README's \"Task planning\" gif. In the Agent Service (lesson 23) these tools "
+        "are <strong>auto-added to every session's toolkit</strong>.",
+    ),
+    table(
+        [("工具", "Tool"), ("作用", "Purpose")],
+        [
+            [("<code>TaskCreate</code>", "<code>TaskCreate</code>"),
+             ("创建一份结构化任务清单", "create a structured task list")],
+            [("<code>TaskUpdate</code>", "<code>TaskUpdate</code>"),
+             ("更新某个任务的状态 / 内容", "update a task's status / content")],
+            [("<code>TaskList</code> / <code>TaskGet</code>", "<code>TaskList</code> / <code>TaskGet</code>"),
+             ("列出 / 读取任务", "list / read tasks")],
+        ],
+    ),
+    code(
+        "from agentscope.tool import Toolkit, TaskCreate, TaskUpdate, TaskList, TaskGet\n\n"
+        "toolkit = Toolkit(tools=[TaskCreate(), TaskUpdate(), TaskList(), TaskGet()])\n"
+        "# the agent calls these to plan: create a list, then mark items done as it goes\n"
+        "# (they read/write AgentState.tasks_context)",
+        cap_zh="把规划工具放进 Toolkit；agent 用它们边做边更新计划。",
+        cap_en="Put the planning tools in a Toolkit; the agent plans and updates as it goes.",
+    ),
     source_map([
         ("state/_state.py", "<code>AgentState</code> / <code>TaskContext</code>",
          "<code>AgentState</code> / <code>TaskContext</code>"),
-        ("state/_task.py", "<code>Task</code>",
-         "<code>Task</code>"),
+        ("state/_task.py", "<code>Task</code> 数据模型",
+         "the <code>Task</code> data model"),
+        ("tool/_task/", "规划工具 <code>TaskCreate</code> / <code>TaskUpdate</code> / "
+         "<code>TaskList</code> / <code>TaskGet</code>",
+         "planning tools <code>TaskCreate</code> / <code>TaskUpdate</code> / "
+         "<code>TaskList</code> / <code>TaskGet</code>"),
+        ("app/_service/_toolkit.py", "服务里把规划工具自动加入会话工具箱",
+         "the service auto-adds the planning tools to each session's toolkit"),
     ]),
     keypoints([
         ("<code>AgentState</code> 是 agent 的可持久化状态（记忆、权限上下文等）。",
@@ -257,6 +342,9 @@ LESSON_19 = blocks(
          "If no <code>state</code> is passed, the Agent creates one."),
         ("持久化状态是多会话隔离与续聊的基础。",
          "Persisted state underpins multi-session isolation and conversation resume."),
+        ("规划工具（<code>TaskCreate</code>/<code>TaskUpdate</code> 等）让 agent 自己拆解并追踪计划。",
+         "Planning tools (<code>TaskCreate</code>/<code>TaskUpdate</code>, …) let the agent break "
+         "down and track its own plan."),
     ]),
 )
 

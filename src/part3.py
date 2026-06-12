@@ -144,20 +144,27 @@ LESSON_10 = blocks(
         "from agentscope.event import EventType\n"
         "from agentscope.message import UserMsg\n\n"
         "async def run(agent):\n"
+        '    answer = []\n'
         '    async for evt in agent.reply_stream(UserMsg("Tony", "What\'s 2+2?")):\n'
         "        match evt.type:\n"
         "            case EventType.REPLY_START:\n"
-        "                ui.begin()\n"
+        "                ...\n"
         "            case EventType.TEXT_BLOCK_DELTA:\n"
-        "                ui.append_text(evt)       # 增量文本 / streamed text\n"
+        "                print(evt.delta, end=\"\", flush=True)  # 增量文本 / streamed text\n"
+        "                answer.append(evt.delta)               # 累积出最终答案 / accumulate\n"
         "            case EventType.TOOL_CALL_START:\n"
-        "                ui.show_tool(evt)         # 模型要调用工具 / a tool call\n"
-        "            case EventType.TOOL_RESULT_END:\n"
-        "                ui.show_result(evt)\n"
+        "                ...        # 模型要调用工具 / a tool call\n"
         "            case EventType.REPLY_END:\n"
-        "                ui.finish(evt)            # 回复完成（不含最终消息）/ reply complete",
-        cap_zh="用 match-case 按事件类型分发。",
-        cap_en="Dispatch by event type with match-case.",
+        '                ...        # 回复完成（不含最终消息）/ reply complete\n'
+        '    return "".join(answer)                            # 最终文本 / the final text',
+        cap_zh="关键：用 evt.delta 取增量文本，并自行累积成最终答案。",
+        cap_en="Key: read incremental text from evt.delta and accumulate the final answer.",
+    ),
+    important(
+        "事件对象不是字符串：增量文本在 <code>evt.delta</code> 里。直接 "
+        "<code>print(evt)</code> 会打印一长串事件 repr，而不是「Hi Tony!」。",
+        "An event is not a string: the incremental text lives in <code>evt.delta</code>. "
+        "<code>print(evt)</code> dumps a long event repr, not \"Hi Tony!\".",
     ),
     h2("流式 vs 一次性", "Streaming vs one-shot"),
     table(

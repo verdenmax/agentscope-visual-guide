@@ -203,6 +203,29 @@ LESSON_14 = blocks(
         "underlying guarantee behind \"swap vendors without touching business code\". (The "
         "reverse direction, messages → vendor request, is the Formatter's job, lesson 11.)",
     ),
+    h2("结构化输出", "Structured output"),
+    p(
+        "想让模型直接产出<strong>符合某个 schema 的结构化数据</strong>（而非自由文本）？用 "
+        "<code>ChatModelBase.generate_structured_output(messages, structured_model=...)</code>，"
+        "传入一个 Pydantic 模型，返回 <code>StructuredResponse</code>，其 <code>.content</code> 是"
+        "符合该 schema 的 <code>dict</code>。",
+        "Need the model to emit <strong>structured data matching a schema</strong> instead of "
+        "free text? Use <code>ChatModelBase.generate_structured_output(messages, "
+        "structured_model=...)</code> with a Pydantic model; it returns a "
+        "<code>StructuredResponse</code> whose <code>.content</code> is a <code>dict</code> "
+        "matching that schema.",
+    ),
+    code(
+        "from pydantic import BaseModel\n\n"
+        "class Person(BaseModel):\n"
+        "    name: str\n"
+        "    age: int\n\n"
+        "resp = await model.generate_structured_output(\n"
+        "    messages, structured_model=Person)\n"
+        "data = resp.content        # a dict matching Person's schema",
+        cap_zh="用 Pydantic 模型约束输出，从 StructuredResponse.content 取 dict。",
+        cap_en="Constrain output with a Pydantic model; read the dict from StructuredResponse.content.",
+    ),
     source_map([
         ("model/_base.py", "<code>ChatModelBase</code> 调用契约",
          "the <code>ChatModelBase</code> call contract"),

@@ -60,6 +60,17 @@ LESSON_26 = blocks(
         "(it ties into the permission system, lesson 16). Results are <code>ToolResponse</code> "
         "(or streaming <code>ToolChunk</code>).",
     ),
+    important(
+        "错误语义很关键：工具里抛出 <code>AgentOrientedException</code>（如内置的 "
+        "<code>ToolNotFoundError</code>）会把错误<strong>作为工具结果回喂给模型</strong>，让 agent "
+        "有机会自行纠错；而 <code>DeveloperOrientedException</code> 会<strong>向上抛给开发者</strong>。"
+        "据此选择：可恢复的错误用前者，编程 / 配置错误用后者。",
+        "Error semantics matter: raising an <code>AgentOrientedException</code> (e.g. the "
+        "built-in <code>ToolNotFoundError</code>) feeds the error <strong>back to the model as a "
+        "tool result</strong> so the agent can recover, whereas a "
+        "<code>DeveloperOrientedException</code> <strong>propagates to the developer</strong>. "
+        "Choose accordingly: recoverable errors → the former, programming/config errors → the latter.",
+    ),
     source_map([
         ("tool/_adapters.py", "<code>FunctionTool</code>（包装函数）",
          "<code>FunctionTool</code> (wraps a function)"),
@@ -195,6 +206,8 @@ LESSON_28 = blocks(
         "from agentscope.credential import DashScopeCredential\n"
         "from agentscope.tool import Toolkit, Bash, Read, Write, Edit\n"
         "from agentscope.middleware import MiddlewareBase\n"
+        "from agentscope.state import AgentState\n"
+        "from agentscope.permission import PermissionContext, PermissionMode\n"
         "from agentscope.message import UserMsg\n"
         "from agentscope.event import EventType\n"
         "import os, asyncio\n\n"
@@ -212,20 +225,22 @@ LESSON_28 = blocks(
         "    ),\n"
         "    toolkit=Toolkit(tools=[Bash(), Read(), Write(), Edit()]),\n"
         "    middlewares=[LoggingMiddleware()],\n"
+        "    # BYPASS so the Write tool runs without pausing for confirmation\n"
+        "    # (see lesson 16 for the confirm round-trip instead):\n"
+        "    state=AgentState(\n"
+        "        permission_context=PermissionContext(mode=PermissionMode.BYPASS)),\n"
         ")\n\n"
         "async def main():\n"
         '    prompt = UserMsg("Tony", "Create hello.py that prints Hello.")\n'
+        "    answer = []\n"
         "    async for evt in agent.reply_stream(prompt):\n"
-        "        match evt.type:\n"
-        "            case EventType.TEXT_BLOCK_DELTA:\n"
-        "                print(evt, end=\"\", flush=True)\n"
-        "            case EventType.REQUIRE_USER_CONFIRM:\n"
-        "                ...   # 权限：批准/拒绝工具调用 / approve or deny\n"
-        "            case EventType.REPLY_END:\n"
-        '                print("\\n[done]")\n\n'
+        "        if evt.type == EventType.TEXT_BLOCK_DELTA:\n"
+        "            print(evt.delta, end=\"\", flush=True)   # stream the text\n"
+        "            answer.append(evt.delta)\n"
+        "    print(\"\\n[done]\")\n\n"
         "asyncio.run(main())",
-        cap_zh="模型+凭证+工具+中间件，经 reply_stream 消费；权限通过事件介入。",
-        cap_en="Model+credential+tools+middleware via reply_stream; permission via events.",
+        cap_zh="模型+凭证+工具+中间件，BYPASS 放行，经 reply_stream 流式消费。",
+        cap_en="Model+credential+tools+middleware, BYPASS-allowed, streamed via reply_stream.",
     ),
     accordion(
         "把它升级成服务",

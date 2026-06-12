@@ -17,7 +17,7 @@ source tree.
 
 | Module | Lessons (filenames) |
 |--------|---------------------|
-| `part1.py` | `01-what-is-agentscope`, `02-architecture`, `03-lifecycle` |
+| `part1.py` | `00-setup`, `01-what-is-agentscope`, `02-architecture`, `03-lifecycle` |
 | `part2.py` | `04-messages`, `05-chat-models`, `06-credentials`, `07-tools`, `08-agents-intro` |
 | `part3.py` | `09-event-system`, `10-streaming`, `11-formatter` |
 | `part4.py` | `12-agent-internals`, `13-toolkit-internals`, `14-model-internals`, `15-middleware` |
@@ -26,7 +26,7 @@ source tree.
 | `part7.py` | `26-custom-tools`, `27-custom-middleware`, `28-capstone` |
 | `glossary.py` | `29-glossary` |
 
-> Note: `part1.py` also defines individual `LESSON_01/02/03` names (it was the exemplar);
+> Note: `part1.py` also defines individual `LESSON_00/01/02/03` names (it was the exemplar);
 > all modules additionally expose the uniform `LESSONS` dict used for integration.
 
 ## Accuracy policy

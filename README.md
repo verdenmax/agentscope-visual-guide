@@ -1,6 +1,6 @@
 # AgentScope 图解教程 · Visual Guide
 
-![Lessons](https://img.shields.io/badge/lessons-29-6d5ae6.svg)
+![Lessons](https://img.shields.io/badge/lessons-30-6d5ae6.svg)
 ![Parts](https://img.shields.io/badge/parts-8-9cf.svg)
 ![Built with](https://img.shields.io/badge/built%20with-Python%203-3776AB.svg?logo=python&logoColor=white)
 ![Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
@@ -50,11 +50,11 @@ Just open **`index.html`** in a browser, or preview with any static server:
 python -m http.server 8000   # then visit http://localhost:8000/
 ```
 
-## 📚 教程结构 / Structure（8 部分 · 29 课 / 8 parts · 29 lessons）
+## 📚 教程结构 / Structure（8 部分 · 30 课 / 8 parts · 30 lessons）
 
 | # | 部分 / Part | 课程 / Lessons |
 |---|-------------|----------------|
-| 1 | 宏观全景 / Macro | 01 是什么 · 02 架构全景 · 03 一次 reply 的生命周期 |
+| 1 | 宏观全景 / Macro | 00 环境配置与第一次运行 · 01 是什么 · 02 架构全景 · 03 一次 reply 的生命周期 |
 | 2 | 用户视角 / User's view | 04 消息 · 05 聊天模型 · 06 凭证 · 07 工具 · 08 Agent 入门 |
 | 3 | 事件与流式 / Events & streaming | 09 事件系统 · 10 流式消费 · 11 Formatter |
 | 4 | 内部源码 / Internals | 12 Agent 内部 · 13 Toolkit 内部 · 14 模型调用内部 · 15 中间件 |

@@ -90,12 +90,25 @@ LESSON_23 = blocks(
         ("examples/agent_service", "可运行的服务示例（<code>main.py</code>）",
          "a runnable service example (<code>main.py</code>)"),
     ]),
+    important(
+        "运行前置条件：服务自带的 <strong>storage 与 message_bus 实现是 Redis-only</strong>"
+        "（只有 workspace 有本地实现）。需要先跑起 Redis（如 "
+        "<code>docker run -p 6379:6379 redis:7</code>），安装 <code>agentscope[full]</code>，"
+        "后端从 <code>agentscope.app.storage</code> / <code>.message_bus</code> / "
+        "<code>.workspace_manager</code> 导入；Web UI（<code>examples/web_ui</code>）需 Node ≥ 20。",
+        "Runtime prerequisites: the shipped <strong>storage and message_bus implementations are "
+        "Redis-only</strong> (only the workspace has a local backend). Run Redis first (e.g. "
+        "<code>docker run -p 6379:6379 redis:7</code>), install <code>agentscope[full]</code>, "
+        "and import the backends from <code>agentscope.app.storage</code> / "
+        "<code>.message_bus</code> / <code>.workspace_manager</code>; the Web UI "
+        "(<code>examples/web_ui</code>) needs Node ≥ 20.",
+    ),
     highlight(
-        "三个后端（存储 / 消息总线 / 工作区）都是<strong>可替换接口</strong>：本地开发用本地实现，"
-        "生产换成 Redis、Docker/E2B，无需改业务代码。",
-        "All three backends (storage / message bus / workspace) are <strong>swappable "
-        "interfaces</strong>: use local implementations in development and swap to Redis, "
-        "Docker/E2B in production without touching business code.",
+        "工作区后端可在本地/Docker/E2B 间切换；而 storage 与 message bus 即使在开发期"
+        "<strong>也需要 Redis</strong>。接口是统一的，未来可扩展其他实现。",
+        "The workspace backend can switch between local/Docker/E2B; storage and the message bus, "
+        "however, <strong>require Redis even in development</strong>. The interfaces are uniform, "
+        "leaving room for other implementations later.",
     ),
     keypoints([
         ("<code>create_app</code> 返回标准 FastAPI 应用，可独立运行或挂载。",

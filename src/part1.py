@@ -11,6 +11,101 @@ from i18n import (
 )
 
 # ---------------------------------------------------------------------------
+# Lesson 00 — Setup & first run
+# ---------------------------------------------------------------------------
+LESSON_00 = blocks(
+    lead(
+        "真正的「从零开始」：本课带你<strong>装好 AgentScope、配好密钥、跑通第一个程序</strong>，"
+        "然后再进入后面的概念。",
+        "Truly \"from zero\": this lesson gets you to <strong>install AgentScope, set your key, "
+        "and run your first program</strong> before any concepts.",
+    ),
+    analogy(
+        "像组装家具前先<strong>清点零件、备好螺丝刀</strong>：环境配好，后面每一课的代码才能直接跑。",
+        "Like <strong>laying out the parts and a screwdriver</strong> before assembling "
+        "furniture: with the environment ready, every later lesson's code just runs.",
+    ),
+    h2("1 · 安装", "1 · Install"),
+    important(
+        "AgentScope 需要 <strong>Python 3.11 或更高</strong>版本。",
+        "AgentScope requires <strong>Python 3.11 or higher</strong>.",
+    ),
+    code(
+        "# 推荐用 uv（也可用 pip）/ recommended via uv (pip works too)\n"
+        "uv pip install agentscope\n"
+        "# 或 / or:  pip install agentscope\n\n"
+        "# 需要服务化 / 全部可选依赖时 / for the service & all extras:\n"
+        "# uv pip install \"agentscope[full]\"",
+        lang="bash",
+        cap_zh="安装核心包；服务化场景再装 [full]。",
+        cap_en="Install the core package; add [full] for the service.",
+    ),
+    h2("2 · 配置密钥", "2 · Configure your key"),
+    p(
+        "模型需要 API key。<strong>从环境变量读取，不要写进代码</strong>（详见第 6 课）。"
+        "以阿里云百炼 / 通义千问（DashScope）为例：",
+        "Models need an API key. <strong>Read it from an environment variable, never hardcode "
+        "it</strong> (see lesson 6). Using DashScope (Qwen) as the example:",
+    ),
+    code(
+        "# 在你的 shell 里设置（key 从厂商控制台获取）\n"
+        "# set it in your shell (get the key from the vendor console)\n"
+        "export DASHSCOPE_API_KEY=\"sk-your-key-here\"",
+        lang="bash",
+        cap_zh="把密钥放进环境变量。",
+        cap_en="Put the key in an environment variable.",
+    ),
+    h2("3 · 第一个程序", "3 · Your first program"),
+    code(
+        "from agentscope.agent import Agent\n"
+        "from agentscope.model import DashScopeChatModel\n"
+        "from agentscope.credential import DashScopeCredential\n"
+        "from agentscope.message import UserMsg\n"
+        "import os, asyncio\n\n"
+        "agent = Agent(\n"
+        '    name="Friday",\n'
+        '    system_prompt="You\'re a helpful assistant named Friday.",\n'
+        "    model=DashScopeChatModel(\n"
+        "        credential=DashScopeCredential(\n"
+        '            api_key=os.environ["DASHSCOPE_API_KEY"]),\n'
+        '        model="qwen3.6-plus",\n'
+        "    ),\n"
+        ")\n\n"
+        "async def main():\n"
+        '    reply = await agent.reply(UserMsg("Tony", "Hi, Friday!"))\n'
+        "    print(reply)\n\n"
+        "asyncio.run(main())",
+        cap_zh="最小可运行程序：构造 Agent，await reply()，打印回复。",
+        cap_en="The smallest runnable program: build an Agent, await reply(), print the reply.",
+    ),
+    note(
+        "几个新手要点：代码是<strong>异步</strong>的，用 <code>asyncio.run(main())</code> 启动；"
+        "<code>agent.reply(...)</code> 返回最终的 <code>AssistantMsg</code>（要流式输出见第 10 课）；"
+        "这个 <code>Agent</code> 没有工具，后面第 7 课再加。",
+        "A few beginner notes: the code is <strong>async</strong>, started with "
+        "<code>asyncio.run(main())</code>; <code>agent.reply(...)</code> returns the final "
+        "<code>AssistantMsg</code> (for streaming see lesson 10); this <code>Agent</code> has no "
+        "tools yet — we add them in lesson 7.",
+    ),
+    source_map([
+        ("pyproject.toml", "依赖与可选分组（<code>service</code> / <code>full</code> 等）",
+         "dependencies and optional groups (<code>service</code> / <code>full</code>, …)"),
+        ("agent/_agent.py", "<code>Agent</code> 与 <code>reply</code>",
+         "<code>Agent</code> and <code>reply</code>"),
+        ("README.md", "官方 Quickstart（安装与 Hello 示例）",
+         "the official Quickstart (install + Hello example)"),
+    ]),
+    keypoints([
+        ("先 <code>uv pip install agentscope</code>（Python 3.11+），再开始写代码。",
+         "First <code>uv pip install agentscope</code> (Python 3.11+), then start coding."),
+        ("API key 放环境变量；代码里 <code>os.environ[...]</code> 读取。",
+         "Put the API key in an env var; read it via <code>os.environ[...]</code> in code."),
+        ("AgentScope 是异步的——用 <code>asyncio.run(main())</code> 启动。",
+         "AgentScope is async — start with <code>asyncio.run(main())</code>."),
+    ]),
+)
+
+# ---------------------------------------------------------------------------
 # Lesson 01 — What is AgentScope
 # ---------------------------------------------------------------------------
 LESSON_01 = blocks(
@@ -92,7 +187,7 @@ LESSON_01 = blocks(
         "async def main():\n"
         '    async for evt in agent.reply_stream(UserMsg("Tony", "Hi, Friday!")):\n'
         "        if evt.type == EventType.TEXT_BLOCK_DELTA:\n"
-        "            print(evt, flush=True)\n\n"
+        "            print(evt.delta, end=\"\", flush=True)\n\n"
         "asyncio.run(main())",
         cap_zh="一个会用工具、流式输出事件的 agent。",
         cap_en="An agent that uses tools and streams events.",
@@ -401,6 +496,7 @@ LESSON_03 = blocks(
 
 
 LESSONS = {
+    "00-setup.html": LESSON_00,
     "01-what-is-agentscope.html": LESSON_01,
     "02-architecture.html": LESSON_02,
     "03-lifecycle.html": LESSON_03,
@@ -408,6 +504,20 @@ LESSONS = {
 
 
 QUIZZES = {
+    "00-setup.html": [
+        (
+            "运行 AgentScope 代码前，最先要做的两件事是？",
+            "What are the first two things to do before running AgentScope code?",
+            [
+                ("安装包（Python 3.11+）并把 API key 设为环境变量",
+                 "Install the package (Python 3.11+) and set the API key as an env var", True),
+                ("先训练一个模型", "Train a model first", False),
+                ("搭一个前端", "Build a frontend first", False),
+            ],
+            "先 uv pip install agentscope（Python 3.11+），再用环境变量配置 API key。",
+            "First uv pip install agentscope (Python 3.11+), then set the API key via an env var.",
+        ),
+    ],
     "01-what-is-agentscope.html": [
         (
             "AgentScope 的核心定位是什么？",

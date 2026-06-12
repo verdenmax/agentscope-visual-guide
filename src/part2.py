@@ -158,6 +158,14 @@ LESSON_05 = blocks(
         ),
         num=1,
     ),
+    tip(
+        "生产可靠性：通过 <code>Agent(model_config=ModelConfig(max_retries=2, "
+        "fallback_model=backup))</code> 配置<strong>重试</strong>与<strong>降级到备用模型</strong>，"
+        "无需改业务代码。",
+        "Production reliability: configure <strong>retries</strong> and a "
+        "<strong>fallback model</strong> via <code>Agent(model_config=ModelConfig("
+        "max_retries=2, fallback_model=backup))</code> — no business-code change.",
+    ),
     source_map([
         ("model/_base.py", "<code>ChatModelBase</code> 统一接口",
          "<code>ChatModelBase</code> unified interface"),

@@ -245,6 +245,8 @@ _TOGGLE_SCRIPT = (
 
 # (file, zh_title, en_title, zh_part, en_part) — order defines progress + nav
 PAGES = [
+    ("00-setup.html", "环境配置与第一次运行", "Setup & First Run",
+     "第一部分 · 宏观全景", "Part 1 · Macro"),
     ("01-what-is-agentscope.html", "AgentScope 是什么", "What is AgentScope",
      "第一部分 · 宏观全景", "Part 1 · Macro"),
     ("02-architecture.html", "整体架构全景", "Architecture panorama",
@@ -281,7 +283,7 @@ PAGES = [
      "第五部分 · 进阶能力", "Part 5 · Advanced"),
     ("18-mcp.html", "MCP 集成", "MCP Integration",
      "第五部分 · 进阶能力", "Part 5 · Advanced"),
-    ("19-state-tasks.html", "状态与任务", "State & Tasks",
+    ("19-state-tasks.html", "状态 · 任务 · 规划", "State, Tasks & Planning",
      "第五部分 · 进阶能力", "Part 5 · Advanced"),
     ("20-skills.html", "技能系统", "Skills",
      "第五部分 · 进阶能力", "Part 5 · Advanced"),
@@ -407,9 +409,9 @@ def index_page(standalone: bool, lesson_prefix: str) -> str:
 
     title = t("AgentScope 图解教程", "AgentScope Visual Guide")
     lead = t(
-        "从零理解 AgentScope 2.0：宏观全景 + 内部源码，29 课，中英双语。",
+        "从零理解 AgentScope 2.0：宏观全景 + 内部源码，30 课，中英双语。",
         "Understand AgentScope 2.0 from zero: macro overview + internals, "
-        "29 lessons, bilingual.",
+        "30 lessons, bilingual.",
     )
     hero = (
         '<div class="hero index-hero">'

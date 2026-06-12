@@ -66,14 +66,14 @@ class TestPage(unittest.TestCase):
         self.assertIn("04-messages.html", out)
 
     def test_first_page_has_no_prev(self):
-        out = shell.page("01-what-is-agentscope.html", "x",
+        out = shell.page("00-setup.html", "x",
                          standalone=True, home_href="../index.html")
         self.assertNotIn('rel="prev"', out)
 
 
 class TestPages(unittest.TestCase):
-    def test_29_pages(self):
-        self.assertEqual(len(shell.PAGES), 29)
+    def test_30_pages(self):
+        self.assertEqual(len(shell.PAGES), 30)
 
     def test_each_page_is_5_tuple(self):
         for row in shell.PAGES:
@@ -82,7 +82,7 @@ class TestPages(unittest.TestCase):
     def test_filenames_unique_and_numbered(self):
         files = [r[0] for r in shell.PAGES]
         self.assertEqual(len(files), len(set(files)))
-        self.assertTrue(files[0].startswith("01-"))
+        self.assertTrue(files[0].startswith("00-"))
         self.assertTrue(files[-1].startswith("29-"))
 
 

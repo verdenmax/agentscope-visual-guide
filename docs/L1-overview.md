@@ -4,7 +4,7 @@
 
 A **zero-dependency** (Python 3.11+ stdlib only) static-site generator that produces a
 bilingual (中文 / English) HTML learning guide for AgentScope 2.0: an `index.html` table of
-contents plus 29 lesson pages under `lessons/`, and single-language print documents for PDF.
+contents plus 30 lesson pages under `lessons/`, and single-language print documents for PDF.
 
 ## Build flow
 
