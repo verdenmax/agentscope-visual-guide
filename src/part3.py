@@ -146,6 +146,15 @@ LESSON_10 = blocks(
         "append into a bubble, a tool call becomes a card, a confirm request pops a button — your "
         "code uses <code>match evt.type</code> to decide how to handle each.",
     ),
+    flow(
+        [("reply_stream", "reply_stream"), ("async for evt", "async for evt"),
+         ("match evt.type", "match evt.type"),
+         ("DELTA→追加 · TOOL→卡片 · END→收尾", "DELTA→append · TOOL→card · END→finish"),
+         ("拼出最终答案", "Assemble final answer")],
+        "消费就是一个分发循环：按事件类型更新 UI，并自行从 delta 累积出最终文本。",
+        "Consuming is a dispatch loop: update the UI per event type and accumulate the final text "
+        "from the deltas yourself.",
+    ),
     h2("基本消费模式", "The basic consumption pattern"),
     code(
         "from agentscope.event import EventType\n"
@@ -203,6 +212,18 @@ LESSON_10 = blocks(
             ),
         ),
         num=1,
+    ),
+    note(
+        "<code>REPLY_END</code> 只标记「回复结束」，<strong>不携带最终消息</strong>（只带 "
+        "<code>session_id</code> / <code>reply_id</code> 等标识字段，没有消息正文）——最终文本要么你自己从 "
+        "<code>TEXT_BLOCK_DELTA</code> 累积，要么改用 <code>await agent.reply(...)</code> 的返回值。"
+        "别指望从 <code>REPLY_END</code> 里取答案。",
+        "<code>REPLY_END</code> only marks \"reply finished\" and <strong>carries no final "
+        "message</strong> (only identifiers like <code>session_id</code> / <code>reply_id</code>, "
+        "no message body) — get the final text either by accumulating "
+        "<code>TEXT_BLOCK_DELTA</code> yourself, or via the "
+        "return value of <code>await agent.reply(...)</code>. Don't expect the answer inside "
+        "<code>REPLY_END</code>.",
     ),
     source_map([
         ("agent/_agent.py",

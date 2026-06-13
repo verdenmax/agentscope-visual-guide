@@ -71,6 +71,53 @@ LESSON_04 = blocks(
         "<code>content</code> may be a plain string (auto-wrapped as a text block) or a list of "
         "content blocks, used for multimodal input or to carry tool calls / results.",
     ),
+    h2("深入：content 永远是「块列表」", "Deeper: content is always a list of blocks"),
+    p(
+        "用 <code>UserMsg</code>/<code>AssistantMsg</code>/<code>SystemMsg</code> 传入一个字符串时，"
+        "这些工厂会把它<strong>归一化成单元素的块列表</strong>（一个 <code>TextBlock</code>）。所以构造出的 "
+        "<code>msg.content</code> 永远是 <code>list[ContentBlock]</code>，不是 <code>str</code>——想拿纯文本请用 "
+        "<code>get_text_content()</code>。",
+        "When you pass a plain string to <code>UserMsg</code>/<code>AssistantMsg</code>/"
+        "<code>SystemMsg</code>, these factories <strong>normalize it into a one-element list of "
+        "blocks</strong> (a single <code>TextBlock</code>). So the resulting <code>msg.content</code> "
+        "is always a <code>list[ContentBlock]</code>, never a <code>str</code> — to get plain text "
+        "use <code>get_text_content()</code>.",
+    ),
+    code(
+        'msg = AssistantMsg("Friday", "Hi!")\n'
+        "type(msg.content)            # list  —— 不是 str / not str\n"
+        "msg.get_text_content()       # 'Hi!'  —— 拼接所有文本块 / joins text blocks\n\n"
+        "# 按 block.type 分发 / dispatch on block.type\n"
+        "for block in msg.content:\n"
+        '    if block.type == "tool_call":      # 注意：tool_call，不是 tool_use\n'
+        "        handle(block)\n"
+        '    elif block.type == "text":\n'
+        "        show(block.text)",
+        cap_zh="content 是块列表；取文本用 get_text_content()，分发看 block.type。",
+        cap_en="content is a list of blocks; use get_text_content() for text, block.type to dispatch.",
+    ),
+    important(
+        "块的判别字段是 <code>type</code> 字面量：<code>ToolCallBlock.type == \"tool_call\"</code>"
+        "（<strong>不是</strong>某些厂商原生的 <code>\"tool_use\"</code>），"
+        "<code>ToolResultBlock.type == \"tool_result\"</code>。跨厂商代码统一按这些字面量判断，"
+        "不要去比对各家 SDK 的原始命名。",
+        "A block's discriminator is its <code>type</code> literal: "
+        "<code>ToolCallBlock.type == \"tool_call\"</code> (<strong>not</strong> the "
+        "<code>\"tool_use\"</code> some vendors use natively), and "
+        "<code>ToolResultBlock.type == \"tool_result\"</code>. Cross-vendor code keys off these, "
+        "never the raw per-SDK names.",
+    ),
+    note(
+        "<code>name</code> 与 <code>role</code> 是两回事：<code>role</code> 只能是 "
+        "<code>user</code>/<code>assistant</code>/<code>system</code> 三选一，而 <code>name</code> "
+        "区分<strong>具体是谁</strong>。多 agent 协作时，会有许多 role 同为 <code>assistant</code> "
+        "但 <code>name</code> 不同的消息；另有 <code>metadata</code> 字典可挂任意附加信息。",
+        "<code>name</code> and <code>role</code> differ: <code>role</code> is only one of "
+        "<code>user</code>/<code>assistant</code>/<code>system</code>, while <code>name</code> "
+        "identifies <strong>who exactly</strong>. In multi-agent work many messages share role "
+        "<code>assistant</code> but differ by <code>name</code>; a <code>metadata</code> dict "
+        "carries arbitrary extra info.",
+    ),
     source_map([
         ("message/_base.py",
          "<code>Msg</code> 类，及 <code>UserMsg</code> / <code>AssistantMsg</code> / "
@@ -91,6 +138,9 @@ LESSON_04 = blocks(
          "functions, not subclasses."),
         ("内容块统一表达文本、思考、工具调用/结果与多模态数据。",
          "Content blocks uniformly express text, thinking, tool calls/results and multimodal data."),
+        ("<code>content</code> 永远是块列表；取文本用 <code>get_text_content()</code>，分发看 <code>block.type</code>。",
+         "<code>content</code> is always a list of blocks; use <code>get_text_content()</code> "
+         "for text and <code>block.type</code> to dispatch."),
     ]),
 )
 
@@ -172,6 +222,57 @@ LESSON_05 = blocks(
         "<strong>fallback model</strong> via <code>Agent(model_config=ModelConfig("
         "max_retries=2, fallback_model=backup))</code> — no business-code change.",
     ),
+    h2("深入：流式与一次性调用", "Deeper: streaming vs one-shot calls"),
+    p(
+        "聊天模型有一个 <code>stream</code> 属性（<strong>默认 True</strong>）。直接调用模型时："
+        "流式返回一个 <strong>async generator</strong>，逐块产出 <code>ChatResponse</code>，每块带 "
+        "<code>is_last</code>、内容随产随增；非流式则直接返回<strong>单个</strong> "
+        "<code>ChatResponse</code>。",
+        "A chat model has a <code>stream</code> attribute (<strong>default True</strong>). When "
+        "you call the model directly: streaming returns an <strong>async generator</strong> "
+        "yielding <code>ChatResponse</code> chunks (each with <code>is_last</code>, content "
+        "growing as it arrives); non-streaming returns a <strong>single</strong> "
+        "<code>ChatResponse</code>.",
+    ),
+    table(
+        [("<code>stream</code>", "<code>stream</code>"), ("调用返回", "The call returns"),
+         ("如何取最终结果", "Getting the final result")],
+        [
+            [("<code>True</code>（默认）", "<code>True</code> (default)"),
+             ("<code>AsyncGenerator[ChatResponse]</code>", "<code>AsyncGenerator[ChatResponse]</code>"),
+             ("<code>async for</code> 直到 <code>chunk.is_last</code>",
+              "<code>async for</code> until <code>chunk.is_last</code>")],
+            [("<code>False</code>", "<code>False</code>"),
+             ("单个 <code>ChatResponse</code>", "a single <code>ChatResponse</code>"),
+             ("直接读 <code>resp.content</code>", "read <code>resp.content</code> directly")],
+        ],
+    ),
+    code(
+        "model = DashScopeChatModel(..., stream=True)\n"
+        "async for chunk in model(messages, tools=tool_schemas):\n"
+        "    # chunk.content 随产随增；chunk.usage 是 ChatUsage\n"
+        "    if chunk.is_last:\n"
+        "        final = chunk          # 最后一块含完整内容 / last chunk has full content\n"
+        "print(final.usage.input_tokens, final.usage.output_tokens, final.usage.time)",
+        cap_zh="流式直调：累积到 is_last；usage 给出 token 数与耗时。",
+        cap_en="Direct streaming call: accumulate until is_last; usage gives tokens and time.",
+    ),
+    important(
+        "区分两层「流式」：<strong>模型层</strong>流式产出的是 <code>ChatResponse</code> 块（本课）；"
+        "<strong>Agent 层</strong>的 <code>reply_stream</code> 产出的是<strong>类型化事件</strong>"
+        "（第 9 / 10 课）。后者是把前者再加工成 UI 友好的事件流——别把两者混为一谈。",
+        "Two layers of \"streaming\": the <strong>model layer</strong> streams "
+        "<code>ChatResponse</code> chunks (this lesson); the <strong>agent layer</strong>'s "
+        "<code>reply_stream</code> streams <strong>typed events</strong> (lessons 9/10). The "
+        "latter refines the former into a UI-friendly event stream — don't conflate them.",
+    ),
+    note(
+        "只有传入 <code>tools=</code>（一组工具的函数规格，内含参数 JSON schema）时，模型才可能产出 "
+        "<code>ToolCallBlock</code>；<code>tool_choice</code> 可进一步约束「自动 / 禁用 / 必须 / 指定某个」工具。",
+        "A model only emits <code>ToolCallBlock</code>s when you pass <code>tools=</code> (a list "
+        "of function specs, each wrapping a parameter JSON schema); <code>tool_choice</code> can "
+        "further constrain \"auto / none / required / a specific\" tool.",
+    ),
     source_map([
         ("model/_base.py", "<code>ChatModelBase</code> 统一接口",
          "<code>ChatModelBase</code> unified interface"),
@@ -187,6 +288,9 @@ LESSON_05 = blocks(
          "A call returns a <code>ChatResponse</code> (content blocks + <code>ChatUsage</code>)."),
         ("换厂商基本只改模型类与配置。",
          "Switching vendors is mostly changing the model class + config."),
+        ("模型默认 <code>stream=True</code>，直调返回 async generator（块带 <code>is_last</code>）。",
+         "Models default to <code>stream=True</code>; a direct call returns an async generator "
+         "(chunks carry <code>is_last</code>)."),
     ]),
 )
 
@@ -466,11 +570,39 @@ LESSON_08 = blocks(
               "<code>ModelConfig</code> / <code>ContextConfig</code> / <code>ReActConfig</code>")],
         ],
     ),
+    h2("三种驱动方式：reply / reply_stream / observe",
+       "Three ways to drive it: reply / reply_stream / observe"),
+    table(
+        [("方法", "Method"), ("产生回复？", "Produces a reply?"), ("返回", "Returns")],
+        [
+            [("<code>await agent.reply(msg)</code>", "<code>await agent.reply(msg)</code>"),
+             ("会（跑完整 ReAct 循环）", "yes (runs the full ReAct loop)"),
+             ("最终 <code>AssistantMsg</code>", "the final <code>AssistantMsg</code>")],
+            [("<code>async for e in agent.reply_stream(msg)</code>",
+              "<code>async for e in agent.reply_stream(msg)</code>"),
+             ("会（同一循环，边跑边播）", "yes (same loop, streamed)"),
+             ("逐个<strong>事件</strong>（第 10 课）", "<strong>events</strong> one by one (lesson 10)")],
+            [("<code>await agent.observe(msgs)</code>", "<code>await agent.observe(msgs)</code>"),
+             ("<strong>不会</strong>", "<strong>no</strong>"),
+             ("<code>None</code>（只写入记忆）", "<code>None</code> (records to memory only)")],
+        ],
+    ),
+    important(
+        "三者都是 <strong>async</strong>：<code>reply</code> / <code>observe</code> 要 "
+        "<code>await</code>，<code>reply_stream</code> 要 <code>async for</code>。漏掉会拿到一个"
+        "协程 / 异步生成器对象，而不是结果。",
+        "All three are <strong>async</strong>: <code>await</code> <code>reply</code> / "
+        "<code>observe</code>, and <code>async for</code> over <code>reply_stream</code>. Forget "
+        "it and you get a coroutine / async-generator object, not a result.",
+    ),
     note(
-        "用 <code>reply</code> 拿最终结果；用 <code>reply_stream</code> 拿事件流（第 10 课）；"
-        "用 <code>observe</code> 注入消息而不立即回复。",
-        "Use <code>reply</code> for the final result; <code>reply_stream</code> for the event "
-        "stream (lesson 10); <code>observe</code> to inject messages without replying.",
+        "Agent 是<strong>有状态</strong>的：每次 <code>reply</code> 都会把这一轮消息并入记忆，"
+        "所以下一次调用记得上文。<code>observe</code> 用来<strong>预置上下文</strong>"
+        "（背景资料、其他 agent 的发言）而不触发回复——「先喂料，稍后再问」。",
+        "An agent is <strong>stateful</strong>: each <code>reply</code> folds the turn's messages "
+        "into memory, so the next call remembers the context. Use <code>observe</code> to "
+        "<strong>pre-load context</strong> (background, other agents' messages) without producing "
+        "a reply — \"feed first, ask later\".",
     ),
     source_map([
         ("agent/_agent.py",
@@ -489,6 +621,8 @@ LESSON_08 = blocks(
          "It runs a ReAct (reason-act) loop, orchestrating tool calls automatically."),
         ("<code>reply</code> 要结果，<code>reply_stream</code> 要过程。",
          "<code>reply</code> for the result, <code>reply_stream</code> for the process."),
+        ("<code>observe</code> 只写入记忆、不回复；三个方法都是 async。",
+         "<code>observe</code> only records to memory and doesn't reply; all three are async."),
     ]),
 )
 
